@@ -1,0 +1,65 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="AppTitle">PDFPuzzle - PDF Batch Processing Tool</sys:String>
+
+    <sys:String x:Key="Header_Methods">Process Menu</sys:String>
+    <sys:String x:Key="Header_Pipeline">Pipeline (</sys:String>
+    <sys:String x:Key="Header_Pipeline_Suffix"> steps)</sys:String>
+    <sys:String x:Key="Header_Files">Target Files (</sys:String>
+    <sys:String x:Key="Header_Files_Suffix"> files)</sys:String>
+
+    <sys:String x:Key="Hint_Pipeline">← Drag from Process Menu&#x0a;or use Add button</sys:String>
+    <sys:String x:Key="Hint_Files">📂 Drop PDF files&#x0a;here</sys:String>
+    <sys:String x:Key="Hint_Trash">🗑 Drop here to remove</sys:String>
+
+    <sys:String x:Key="Btn_AddToPipeline">＋ Add to Pipeline</sys:String>
+    <sys:String x:Key="Btn_DeleteSelected">Remove</sys:String>
+    <sys:String x:Key="Btn_AddFiles">＋ Add Files</sys:String>
+    <sys:String x:Key="Btn_Execute">▶  Run</sys:String>
+    <sys:String x:Key="Btn_SelectFolder">Select Folder</sys:String>
+    <sys:String x:Key="Btn_Settings">Settings</sys:String>
+    <sys:String x:Key="Btn_Exit">Exit</sys:String>
+
+    <sys:String x:Key="Label_OutputDir">Output:</sys:String>
+    <sys:String x:Key="Label_OutputNotSet">(not set)</sys:String>
+
+    <sys:String x:Key="Status_Processing">Processing...</sys:String>
+    <sys:String x:Key="Status_Done">Done</sys:String>
+
+    <sys:String x:Key="Settings_Title">Settings</sys:String>
+    <sys:String x:Key="Settings_Tab_Split">Split</sys:String>
+    <sys:String x:Key="Settings_Tab_Extract">Extract Pages</sys:String>
+    <sys:String x:Key="Settings_Tab_Output">Output</sys:String>
+    <sys:String x:Key="Settings_Language">言語 / Language</sys:String>
+    <sys:String x:Key="Settings_Split_Options">Split Options</sys:String>
+    <sys:String x:Key="Settings_Split_PageCount">Pages per output file</sys:String>
+    <sys:String x:Key="Settings_Extract_Options">Extract Options</sys:String>
+    <sys:String x:Key="Settings_Extract_PageRange">Page range to extract</sys:String>
+    <sys:String x:Key="Settings_Extract_PageRangeNote">Example: 1,3,5-8 (comma-separated, hyphen for ranges)</sys:String>
+    <sys:String x:Key="Settings_Output_Options">Output Options</sys:String>
+    <sys:String x:Key="Settings_Output_OpenFolder">Open output folder automatically after processing</sys:String>
+    <sys:String x:Key="Btn_OK">OK</sys:String>
+
+    <sys:String x:Key="Method_Merge">Merge PDFs</sys:String>
+    <sys:String x:Key="Method_Split">Split PDF</sys:String>
+    <sys:String x:Key="Method_Extract">Extract Pages</sys:String>
+
+    <sys:String x:Key="License_Title">License Activation</sys:String>
+    <sys:String x:Key="License_Instruction">Please enter the license key from your Gumroad purchase receipt.&#x0a;The key was sent to your email after purchase.</sys:String>
+    <sys:String x:Key="License_KeyLabel">License Key</sys:String>
+    <sys:String x:Key="License_Activate">Activate</sys:String>
+    <sys:String x:Key="License_Cancel">Exit</sys:String>
+    <sys:String x:Key="License_BuyLink">Purchase a license →</sys:String>
+    <sys:String x:Key="License_Verifying">Verifying...</sys:String>
+    <sys:String x:Key="License_Success">Activation successful.</sys:String>
+    <sys:String x:Key="License_ErrorEmpty">Please enter a license key.</sys:String>
+    <sys:String x:Key="License_ErrorInvalid">Invalid license key.</sys:String>
+    <sys:String x:Key="License_ErrorNetwork">Network error. Please check your internet connection.</sys:String>
+
+    <sys:String x:Key="Msg_NeedFileAndAction">Please specify both files and a process to run.</sys:String>
+    <sys:String x:Key="Msg_NeedMoreFiles">Merging PDFs requires 2 or more files.</sys:String>
+    <sys:String x:Key="Msg_NoPageRange">No page range set. Please configure in Settings.</sys:String>
+
+</ResourceDictionary>

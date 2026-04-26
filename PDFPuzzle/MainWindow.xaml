@@ -1,0 +1,228 @@
+<Window x:Class="PDFPuzzle.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        mc:Ignorable="d"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="{DynamicResource AppTitle}"
+        Height="540" Width="880" MinHeight="460" MinWidth="720"
+        Background="#F5F5F5"
+        PreviewMouseUp="Window_PreviewMouseUp"
+        Drop="Window_Drop"
+        QueryContinueDrag="Window_QueryContinueDrag"
+        AllowDrop="True">
+
+    <Window.Resources>
+        <Style x:Key="PanelCard" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10"/>
+        </Style>
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#424242"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+        <Style x:Key="HintText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#BDBDBD"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#BDBDBD"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style TargetType="ListBox">
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="2"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="12,10,12,10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" MinHeight="220"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="140"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*" MinWidth="160"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*" MinWidth="160"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Panel 1: Process Menu -->
+        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource PanelCard}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Style="{StaticResource SectionHeader}" Text="{DynamicResource Header_Methods}"/>
+                <ListBox x:Name="MethodList" Grid.Row="1"
+                         ItemsSource="{Binding MethodItems}" DisplayMemberPath="DisplayName"
+                         SelectionMode="Single" AllowDrop="True"
+                         MouseLeftButtonDown="MethodList_MouseLeftButtonDown"
+                         MouseMove="MethodList_MouseMove"
+                         MouseLeftButtonUp="MethodList_MouseLeftButtonUp"
+                         Drop="MethodList_Drop" DragOver="MethodList_DragOver"
+                         DragEnter="MethodList_DragEnter" MouseLeave="MethodList_MouseLeave"/>
+                <Button Grid.Row="2" Content="{DynamicResource Btn_AddToPipeline}"
+                        Click="Add_Exe_Button_Click" Margin="0,8,0,0"/>
+            </Grid>
+        </Border>
+
+        <!-- Panel 2: Pipeline -->
+        <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource PanelCard}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Style="{StaticResource SectionHeader}">
+                    <Run Text="{DynamicResource Header_Pipeline}"/>
+                    <Run Text="{Binding ExeItems.Count, Mode=OneWay}"/>
+                    <Run Text="{DynamicResource Header_Pipeline_Suffix}"/>
+                </TextBlock>
+                <Grid Grid.Row="1">
+                    <ListBox x:Name="ExeList"
+                             ItemsSource="{Binding ExeItems}" DisplayMemberPath="DisplayName"
+                             SelectionMode="Single" AllowDrop="True"
+                             MouseMove="ExeList_MouseMove"
+                             MouseLeftButtonUp="ExeList_MouseLeftButtonUp"
+                             MouseLeftButtonDown="ExeList_MouseLeftButtonDown"
+                             Drop="ExeList_Drop" DragOver="ExeList_DragOver"
+                             DragEnter="ExeList_DragEnter"/>
+                    <TextBlock Text="{DynamicResource Hint_Pipeline}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource HintText}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ExeItems.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+                <Border Grid.Row="2" Margin="0,8,0,0" Height="36"
+                        BorderBrush="#FFCDD2" BorderThickness="1" CornerRadius="4"
+                        Background="#FFF8F8" AllowDrop="True"
+                        DragOver="Rectangle_DragOver" Drop="Rectangle_Drop">
+                    <TextBlock Text="{DynamicResource Hint_Trash}" Foreground="#EF9A9A"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               FontSize="11" IsHitTestVisible="False"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Panel 3: Files -->
+        <Border Grid.Row="0" Grid.Column="4" Style="{StaticResource PanelCard}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Style="{StaticResource SectionHeader}">
+                    <Run Text="{DynamicResource Header_Files}"/>
+                    <Run Text="{Binding FileItems.Count, Mode=OneWay}"/>
+                    <Run Text="{DynamicResource Header_Files_Suffix}"/>
+                </TextBlock>
+                <Grid Grid.Row="1">
+                    <ListBox x:Name="FileList"
+                             ItemsSource="{Binding FileItems}" DisplayMemberPath="DisplayPath"
+                             SelectionMode="Single" AllowDrop="True"
+                             DragOver="FileList_DragOver" Drop="FileList_Drop"
+                             MouseMove="FileList_MouseMove" DragEnter="FileList_DragEnter"
+                             MouseLeftButtonUp="FileList_MouseLeftButtonUp"
+                             MouseLeftButtonDown="FileList_MouseLeftButtonDown"/>
+                    <TextBlock Text="{DynamicResource Hint_Files}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource HintText}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding FileItems.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+                <Grid Grid.Row="2" Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="4"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="{DynamicResource Btn_AddFiles}" Click="Ref_Button_Click"/>
+                    <Button Grid.Column="2" Content="{DynamicResource Btn_DeleteSelected}" Width="52" Click="Delete_Button_Click"/>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Output Row -->
+        <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5"
+                Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
+                CornerRadius="6" Padding="10,8" Margin="0,8,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{DynamicResource Label_OutputDir}"
+                           FontWeight="SemiBold" Foreground="#424242" VerticalAlignment="Center"/>
+                <Label x:Name="OutputLabel" Grid.Column="1"
+                       Content="{DynamicResource Label_OutputNotSet}"
+                       Foreground="#757575" Padding="8,0" VerticalAlignment="Center"/>
+                <Button Grid.Column="2" Content="{DynamicResource Btn_SelectFolder}"
+                        Width="120" Click="SelectFolder_Click" Padding="10,5"/>
+            </Grid>
+        </Border>
+
+        <!-- Execute Row -->
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar x:Name="ExecuteProgressBar" Grid.Column="0"
+                         Height="6" IsIndeterminate="True" Visibility="Collapsed"
+                         VerticalAlignment="Center" Margin="0,0,12,0"/>
+            <Button x:Name="Exe_Button" Grid.Column="1"
+                    Content="{DynamicResource Btn_Execute}"
+                    Width="130" Height="36" Click="Exe_Button_Click"
+                    Background="#D32F2F" Foreground="White"
+                    FontWeight="Bold" FontSize="13" BorderThickness="0"/>
+            <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="8,0,0,0">
+                <Button Content="{DynamicResource Btn_Settings}"
+                        MinWidth="55" Height="36" Click="Settings_Button_Click"/>
+                <Button Content="{DynamicResource Btn_Exit}"
+                        MinWidth="55" Height="36" Click="Exit_Button_Click" Margin="4,0,0,0"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Status Row -->
+        <Label x:Name="StatusLabel" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5"
+               Content="" Foreground="DarkGreen" Padding="2,6,2,0" FontSize="12"/>
+    </Grid>
+</Window>

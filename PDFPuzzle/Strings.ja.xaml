@@ -1,0 +1,65 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="AppTitle">PDFPuzzle - PDF一括処理ツール</sys:String>
+
+    <sys:String x:Key="Header_Methods">処理メニュー</sys:String>
+    <sys:String x:Key="Header_Pipeline">実行パイプライン（</sys:String>
+    <sys:String x:Key="Header_Pipeline_Suffix">件）</sys:String>
+    <sys:String x:Key="Header_Files">対象ファイル（</sys:String>
+    <sys:String x:Key="Header_Files_Suffix">件）</sys:String>
+
+    <sys:String x:Key="Hint_Pipeline">← 処理メニューから&#x0a;ドラッグして追加</sys:String>
+    <sys:String x:Key="Hint_Files">📂 PDFファイルを&#x0a;ここにドロップ</sys:String>
+    <sys:String x:Key="Hint_Trash">🗑 ここにドロップして削除</sys:String>
+
+    <sys:String x:Key="Btn_AddToPipeline">＋ パイプラインに追加</sys:String>
+    <sys:String x:Key="Btn_DeleteSelected">削除</sys:String>
+    <sys:String x:Key="Btn_AddFiles">＋ ファイルを追加</sys:String>
+    <sys:String x:Key="Btn_Execute">▶  処理を実行</sys:String>
+    <sys:String x:Key="Btn_SelectFolder">フォルダを選択</sys:String>
+    <sys:String x:Key="Btn_Settings">設定</sys:String>
+    <sys:String x:Key="Btn_Exit">終了</sys:String>
+
+    <sys:String x:Key="Label_OutputDir">出力先：</sys:String>
+    <sys:String x:Key="Label_OutputNotSet">（未設定）</sys:String>
+
+    <sys:String x:Key="Status_Processing">処理中...</sys:String>
+    <sys:String x:Key="Status_Done">完了</sys:String>
+
+    <sys:String x:Key="Settings_Title">設定</sys:String>
+    <sys:String x:Key="Settings_Tab_Split">分割</sys:String>
+    <sys:String x:Key="Settings_Tab_Extract">ページ抽出</sys:String>
+    <sys:String x:Key="Settings_Tab_Output">出力設定</sys:String>
+    <sys:String x:Key="Settings_Language">言語 / Language</sys:String>
+    <sys:String x:Key="Settings_Split_Options">分割オプション</sys:String>
+    <sys:String x:Key="Settings_Split_PageCount">1ファイルあたりのページ数</sys:String>
+    <sys:String x:Key="Settings_Extract_Options">抽出オプション</sys:String>
+    <sys:String x:Key="Settings_Extract_PageRange">抽出するページ番号</sys:String>
+    <sys:String x:Key="Settings_Extract_PageRangeNote">例: 1,3,5-8（カンマ区切り・ハイフンで範囲指定）</sys:String>
+    <sys:String x:Key="Settings_Output_Options">出力オプション</sys:String>
+    <sys:String x:Key="Settings_Output_OpenFolder">処理完了後、出力フォルダを自動で開く</sys:String>
+    <sys:String x:Key="Btn_OK">OK</sys:String>
+
+    <sys:String x:Key="Method_Merge">PDFを結合</sys:String>
+    <sys:String x:Key="Method_Split">PDFを分割</sys:String>
+    <sys:String x:Key="Method_Extract">ページを抽出</sys:String>
+
+    <sys:String x:Key="License_Title">ライセンス認証</sys:String>
+    <sys:String x:Key="License_Instruction">Gumroadでご購入いただいたライセンスキーを入力してください。&#x0a;購入後のメールにキーが記載されています。</sys:String>
+    <sys:String x:Key="License_KeyLabel">ライセンスキー</sys:String>
+    <sys:String x:Key="License_Activate">認証する</sys:String>
+    <sys:String x:Key="License_Cancel">終了</sys:String>
+    <sys:String x:Key="License_BuyLink">ライセンスを購入する →</sys:String>
+    <sys:String x:Key="License_Verifying">確認中...</sys:String>
+    <sys:String x:Key="License_Success">認証に成功しました。</sys:String>
+    <sys:String x:Key="License_ErrorEmpty">ライセンスキーを入力してください。</sys:String>
+    <sys:String x:Key="License_ErrorInvalid">無効なライセンスキーです。</sys:String>
+    <sys:String x:Key="License_ErrorNetwork">ネットワークエラー。インターネット接続を確認してください。</sys:String>
+
+    <sys:String x:Key="Msg_NeedFileAndAction">ファイルと実行内容を両方指定してください。</sys:String>
+    <sys:String x:Key="Msg_NeedMoreFiles">PDFの結合には2つ以上のファイルが必要です。</sys:String>
+    <sys:String x:Key="Msg_NoPageRange">抽出するページ番号が設定されていません。設定画面から設定してください。</sys:String>
+
+</ResourceDictionary>
