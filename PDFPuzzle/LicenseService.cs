@@ -10,6 +10,9 @@ namespace PDFPuzzle
 
         public static bool IsActivated()
         {
+#if DEBUG
+            return true;
+#endif
             var settings = AppSettings.Load();
             return !string.IsNullOrEmpty(settings.LicenseKey);
         }
