@@ -61,5 +61,6 @@
     <sys:String x:Key="Msg_NeedFileAndAction">Please specify both files and a process to run.</sys:String>
     <sys:String x:Key="Msg_NeedMoreFiles">Merging PDFs requires 2 or more files.</sys:String>
     <sys:String x:Key="Msg_NoPageRange">No page range set. Please configure in Settings.</sys:String>
+    <sys:String x:Key="Msg_SelectMethod">Please select a method from the menu first.</sys:String>
 
 </ResourceDictionary>

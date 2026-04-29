@@ -61,5 +61,6 @@
     <sys:String x:Key="Msg_NeedFileAndAction">ファイルと実行内容を両方指定してください。</sys:String>
     <sys:String x:Key="Msg_NeedMoreFiles">PDFの結合には2つ以上のファイルが必要です。</sys:String>
     <sys:String x:Key="Msg_NoPageRange">抽出するページ番号が設定されていません。設定画面から設定してください。</sys:String>
+    <sys:String x:Key="Msg_SelectMethod">処理メニューから追加したい処理を選択してください。</sys:String>
 
 </ResourceDictionary>

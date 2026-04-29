@@ -262,9 +262,19 @@ namespace PDFPuzzle
         // ===== Buttons =====
         private void Add_Exe_Button_Click(object sender, RoutedEventArgs e)
         {
-            var selected = (MethodItem)MethodList.SelectedItem;
-            if (selected != null)
-                ExeItems.Add(_itemService.ConvertToExeitem(selected.Clone())!);
+            if (MethodList.SelectedItem == null && MethodItems.Count > 0)
+                MethodList.SelectedIndex = 0;
+
+            var selected = MethodList.SelectedItem as MethodItem;
+            if (selected == null)
+            {
+                StatusLabel.Content = L("Msg_SelectMethod");
+                StatusLabel.Foreground = System.Windows.Media.Brushes.OrangeRed;
+                return;
+            }
+
+            ExeItems.Add(_itemService.ConvertToExeitem(selected.Clone())!);
+            StatusLabel.Content = string.Empty;
         }
 
         private void Delete_Button_Click(object sender, RoutedEventArgs e)
