@@ -27,6 +27,7 @@
 
     <sys:String x:Key="Status_Processing">Processing...</sys:String>
     <sys:String x:Key="Status_Done">Done</sys:String>
+    <sys:String x:Key="Status_Error">An error occurred</sys:String>
 
     <sys:String x:Key="Settings_Title">Settings</sys:String>
     <sys:String x:Key="Settings_Tab_Split">Split</sys:String>
@@ -81,5 +82,11 @@
     <sys:String x:Key="Workflow_Load_Failed">Could not load workflow. It contains methods that no longer exist.</sys:String>
     <sys:String x:Key="Status_WorkflowSaved">Workflow saved</sys:String>
     <sys:String x:Key="Status_WorkflowLoaded">Workflow loaded</sys:String>
+
+    <sys:String x:Key="Settings_Logs_Header">Process Logs</sys:String>
+    <sys:String x:Key="Settings_Logs_Description">Execution history is saved as daily JSON files. Useful for audit trails or reporting to clients.</sys:String>
+    <sys:String x:Key="Btn_OpenLogFolder">Open Log Folder</sys:String>
+    <sys:String x:Key="Btn_ExportLogCsv">Export as CSV</sys:String>
+    <sys:String x:Key="Msg_CsvExportDone">Exported {0} log entries.&#x0a;{1}</sys:String>
 
 </ResourceDictionary>

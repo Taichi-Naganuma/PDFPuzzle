@@ -27,6 +27,7 @@
 
     <sys:String x:Key="Status_Processing">処理中...</sys:String>
     <sys:String x:Key="Status_Done">完了</sys:String>
+    <sys:String x:Key="Status_Error">エラーが発生しました</sys:String>
 
     <sys:String x:Key="Settings_Title">設定</sys:String>
     <sys:String x:Key="Settings_Tab_Split">分割</sys:String>
@@ -81,5 +82,11 @@
     <sys:String x:Key="Workflow_Load_Failed">ワークフローを読込めませんでした。処理メニューに存在しない項目が含まれています。</sys:String>
     <sys:String x:Key="Status_WorkflowSaved">ワークフローを保存しました</sys:String>
     <sys:String x:Key="Status_WorkflowLoaded">ワークフローを読込みました</sys:String>
+
+    <sys:String x:Key="Settings_Logs_Header">処理ログ</sys:String>
+    <sys:String x:Key="Settings_Logs_Description">実行履歴は日次のJSONファイルとして保存されます。監査・取引先への報告用にご利用ください。</sys:String>
+    <sys:String x:Key="Btn_OpenLogFolder">ログフォルダを開く</sys:String>
+    <sys:String x:Key="Btn_ExportLogCsv">CSVでエクスポート</sys:String>
+    <sys:String x:Key="Msg_CsvExportDone">{0}件のログを書き出しました。&#x0a;{1}</sys:String>
 
 </ResourceDictionary>

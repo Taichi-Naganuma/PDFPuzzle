@@ -1,3 +1,5 @@
+using Microsoft.Win32;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -29,6 +31,43 @@ namespace PDFPuzzle
             s.OpenFolderAfterExecution = OpenFolderCheckBox.IsChecked == true;
             s.Save();
             Hide();
+        }
+
+        private void OpenLogFolder_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Directory.CreateDirectory(LogService.LogDirectory);
+                System.Diagnostics.Process.Start("explorer.exe", LogService.LogDirectory);
+            }
+            catch { }
+        }
+
+        private void ExportLogCsv_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new SaveFileDialog
+            {
+                Filter = "CSV (*.csv)|*.csv",
+                FileName = $"pdfpuzzle_logs_{DateTime.Now:yyyyMMdd}.csv"
+            };
+            if (dialog.ShowDialog() != true) return;
+
+            try
+            {
+                int rows = LogService.ExportToCsv(dialog.FileName);
+                MessageBox.Show(
+                    string.Format(LocalizationService.Get("Msg_CsvExportDone"), rows, dialog.FileName),
+                    LocalizationService.Get("Btn_ExportLogCsv"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message,
+                    LocalizationService.Get("Btn_ExportLogCsv"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
         }
 
         private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

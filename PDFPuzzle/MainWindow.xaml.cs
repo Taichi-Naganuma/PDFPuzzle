@@ -328,25 +328,62 @@ namespace PDFPuzzle
 
             var steps = ExeItems.ToList();
             var progress = new Progress<string>(msg => StatusLabel.Content = msg);
+            var logRun = LogService.StartRun(FolderPath);
 
             try
             {
                 for (int i = 0; i < steps.Count; i++)
                 {
                     var item = steps[i];
-                    if (item.ExecuteAsync != null)
+                    if (item.ExecuteAsync == null) continue;
+
+                    var stepStart = DateTime.Now;
+                    var inputs = FileItems.Where(f => f.Path != null).Select(f => f.Path!).ToList();
+                    bool ok = true;
+                    string? error = null;
+                    try
+                    {
                         await item.ExecuteAsync(progress);
+                    }
+                    catch (Exception ex)
+                    {
+                        ok = false;
+                        error = ex.Message;
+                        throw;
+                    }
+                    finally
+                    {
+                        var outputs = FileItems.Where(f => f.Path != null).Select(f => f.Path!).ToList();
+                        LogService.AddStep(logRun, new StepLogEntry
+                        {
+                            MethodKey = item.DisplayNameKey,
+                            MethodName = item.DisplayName,
+                            StartedAt = stepStart,
+                            CompletedAt = DateTime.Now,
+                            InputFiles = inputs,
+                            OutputFiles = outputs,
+                            Success = ok,
+                            ErrorMessage = error
+                        });
+                    }
                 }
+
+                StatusLabel.Content = L("Status_Done");
+                StatusLabel.Foreground = Brushes.DarkGreen;
+                if (_settings.OpenFolderAfterExecution && FolderPath != null)
+                    System.Diagnostics.Process.Start("explorer.exe", FolderPath);
+            }
+            catch (Exception ex)
+            {
+                StatusLabel.Content = L("Status_Error");
+                StatusLabel.Foreground = Brushes.DarkRed;
+                MessageBox.Show(ex.Message, L("Status_Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             finally
             {
+                LogService.EndRun(logRun);
                 Exe_Button.IsEnabled = true;
                 ExecuteProgressBar.Visibility = Visibility.Collapsed;
-                StatusLabel.Content = L("Status_Done");
-                StatusLabel.Foreground = Brushes.DarkGreen;
-
-                if (_settings.OpenFolderAfterExecution && FolderPath != null)
-                    System.Diagnostics.Process.Start("explorer.exe", FolderPath);
             }
         }
 

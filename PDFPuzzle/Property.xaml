@@ -39,9 +39,20 @@
             <TabItem Header="{DynamicResource Settings_Tab_Output}">
                 <StackPanel Margin="12">
                     <TextBlock Text="{DynamicResource Settings_Output_Options}" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                    <CheckBox x:Name="OpenFolderCheckBox" Margin="0,0,0,8">
+                    <CheckBox x:Name="OpenFolderCheckBox" Margin="0,0,0,16">
                         <TextBlock Text="{DynamicResource Settings_Output_OpenFolder}" TextWrapping="Wrap" MaxWidth="400"/>
                     </CheckBox>
+
+                    <TextBlock Text="{DynamicResource Settings_Logs_Header}" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                    <TextBlock Text="{DynamicResource Settings_Logs_Description}"
+                               Foreground="#757575" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="{DynamicResource Btn_OpenLogFolder}"
+                                Padding="14,6" Click="OpenLogFolder_Click"/>
+                        <Button Content="{DynamicResource Btn_ExportLogCsv}"
+                                Padding="14,6" Margin="6,0,0,0"
+                                Click="ExportLogCsv_Click"/>
+                    </StackPanel>
                 </StackPanel>
             </TabItem>
 
