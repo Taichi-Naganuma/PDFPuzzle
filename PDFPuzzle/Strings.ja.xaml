@@ -58,6 +58,10 @@
     <sys:String x:Key="License_ErrorEmpty">ライセンスキーを入力してください。</sys:String>
     <sys:String x:Key="License_ErrorInvalid">無効なライセンスキーです。</sys:String>
     <sys:String x:Key="License_ErrorNetwork">ネットワークエラー。インターネット接続を確認してください。</sys:String>
+    <sys:String x:Key="License_CurrentTier_Prefix">現在のライセンス階層: </sys:String>
+
+    <sys:String x:Key="Tier_Personal">個人版</sys:String>
+    <sys:String x:Key="Tier_Business">事業者版</sys:String>
 
     <sys:String x:Key="Msg_NeedFileAndAction">ファイルと実行内容を両方指定してください。</sys:String>
     <sys:String x:Key="Msg_NeedMoreFiles">PDFの結合には2つ以上のファイルが必要です。</sys:String>

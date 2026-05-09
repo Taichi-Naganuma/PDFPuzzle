@@ -12,6 +12,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -26,27 +27,35 @@
         <TextBlock Grid.Row="1"
                    Text="{DynamicResource License_Instruction}"
                    TextWrapping="Wrap" Foreground="#424242"
-                   FontSize="12" Margin="0,0,0,20"/>
+                   FontSize="12" Margin="0,0,0,12"/>
+
+        <!-- 迴ｾ蝨ｨ縺ｮ繝ｩ繧､繧ｻ繝ｳ繧ｹ髫主ｱ､ -->
+        <TextBlock Grid.Row="2"
+                   FontSize="11" Foreground="#1565C0"
+                   Margin="0,0,0,8">
+            <Run Text="{DynamicResource License_CurrentTier_Prefix}"/>
+            <Run x:Name="CurrentTierText" FontWeight="Bold"/>
+        </TextBlock>
 
         <!-- 繝ｩ繧､繧ｻ繝ｳ繧ｹ繧ｭ繝ｼ繝ｩ繝吶Ν -->
-        <TextBlock Grid.Row="2"
+        <TextBlock Grid.Row="3"
                    Text="{DynamicResource License_KeyLabel}"
                    FontWeight="SemiBold" Foreground="#424242"
                    FontSize="12" Margin="0,0,0,6"/>
 
         <!-- 繝ｩ繧､繧ｻ繝ｳ繧ｹ繧ｭ繝ｼ蜈･蜉・-->
-        <TextBox x:Name="LicenseKeyBox" Grid.Row="3"
+        <TextBox x:Name="LicenseKeyBox" Grid.Row="4"
                  Height="36" FontSize="13"
                  VerticalContentAlignment="Center" Padding="8,0"
                  BorderBrush="#BDBDBD" BorderThickness="1"/>
 
         <!-- 繧ｨ繝ｩ繝ｼ繝ｻ繧ｹ繝・・繧ｿ繧ｹ繝｡繝・そ繝ｼ繧ｸ -->
-        <TextBlock x:Name="StatusText" Grid.Row="4"
+        <TextBlock x:Name="StatusText" Grid.Row="5"
                    TextWrapping="Wrap" FontSize="11"
                    Margin="0,8,0,0" VerticalAlignment="Top"/>
 
         <!-- 繝懊ち繝ｳ陦・-->
-        <Grid Grid.Row="5">
+        <Grid Grid.Row="6">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>

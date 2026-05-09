@@ -10,6 +10,10 @@ namespace PDFPuzzle
         public LicenseWindow()
         {
             InitializeComponent();
+
+            var tier = LicenseService.GetCurrentTier();
+            CurrentTierText.Text = LocalizationService.Get(tier == LicenseTier.Business
+                ? "Tier_Business" : "Tier_Personal");
         }
 
         private async void ActivateButton_Click(object sender, RoutedEventArgs e)

@@ -1,5 +1,6 @@
-﻿using System.IO;
+using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace PDFPuzzle
 {
@@ -12,10 +13,17 @@ namespace PDFPuzzle
         public int SplitPageCount { get; set; } = 1;
         public string? ExtractPageRange { get; set; }
         public string? WatermarkText { get; set; }
+        public LicenseTier LicenseTier { get; set; } = LicenseTier.Personal;
 
         private static readonly string SettingsDir =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PDFPuzzle");
         private static readonly string SettingsPath = Path.Combine(SettingsDir, "settings.json");
+
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            WriteIndented = true,
+            Converters = { new JsonStringEnumConverter() }
+        };
 
         public static AppSettings Load()
         {
@@ -24,7 +32,7 @@ namespace PDFPuzzle
                 if (File.Exists(SettingsPath))
                 {
                     string json = File.ReadAllText(SettingsPath);
-                    return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+                    return JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
                 }
             }
             catch { }
@@ -36,11 +44,10 @@ namespace PDFPuzzle
             try
             {
                 Directory.CreateDirectory(SettingsDir);
-                string json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+                string json = JsonSerializer.Serialize(this, JsonOptions);
                 File.WriteAllText(SettingsPath, json);
             }
             catch { }
         }
     }
 }
-

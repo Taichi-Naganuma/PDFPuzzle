@@ -58,6 +58,10 @@
     <sys:String x:Key="License_ErrorEmpty">Please enter a license key.</sys:String>
     <sys:String x:Key="License_ErrorInvalid">Invalid license key.</sys:String>
     <sys:String x:Key="License_ErrorNetwork">Network error. Please check your internet connection.</sys:String>
+    <sys:String x:Key="License_CurrentTier_Prefix">Current license tier: </sys:String>
+
+    <sys:String x:Key="Tier_Personal">Personal Edition</sys:String>
+    <sys:String x:Key="Tier_Business">Business Edition</sys:String>
 
     <sys:String x:Key="Msg_NeedFileAndAction">Please specify both files and a process to run.</sys:String>
     <sys:String x:Key="Msg_NeedMoreFiles">Merging PDFs requires 2 or more files.</sys:String>

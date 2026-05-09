@@ -17,6 +17,15 @@ namespace PDFPuzzle
             return !string.IsNullOrEmpty(settings.LicenseKey);
         }
 
+        public static LicenseTier GetCurrentTier()
+        {
+#if DEBUG
+            return LicenseTier.Business;
+#else
+            return AppSettings.Load().LicenseTier;
+#endif
+        }
+
         public static async Task<(bool Success, string Message)> ActivateAsync(string licenseKey)
         {
             if (string.IsNullOrWhiteSpace(licenseKey))

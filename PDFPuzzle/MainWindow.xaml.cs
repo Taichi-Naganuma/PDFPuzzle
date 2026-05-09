@@ -27,6 +27,7 @@ namespace PDFPuzzle
             {
                 foreach (var item in MethodItems) item.RefreshDisplayName();
                 foreach (var item in ExeItems) item.RefreshDisplayName();
+                UpdateTitle();
             };
 
             if (_settings.OutputFolderPath != null && Directory.Exists(_settings.OutputFolderPath))
@@ -34,6 +35,17 @@ namespace PDFPuzzle
                 FolderPath = _settings.OutputFolderPath;
                 OutputLabel.Content = Path.GetFileName(FolderPath);
             }
+
+            UpdateTitle();
+        }
+
+        private void UpdateTitle()
+        {
+            var baseTitle = LocalizationService.Get("AppTitle");
+            var tier = LicenseService.GetCurrentTier();
+            var tierLabel = LocalizationService.Get(tier == LicenseTier.Business
+                ? "Tier_Business" : "Tier_Personal");
+            Title = $"{baseTitle} - {tierLabel}";
         }
 
         private readonly Methods _methods;
