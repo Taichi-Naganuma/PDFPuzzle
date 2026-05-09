@@ -63,4 +63,23 @@
     <sys:String x:Key="Msg_NoPageRange">No page range set. Please configure in Settings.</sys:String>
     <sys:String x:Key="Msg_SelectMethod">Please select a method from the menu first.</sys:String>
 
+    <sys:String x:Key="Btn_SaveWorkflow">💾 Save</sys:String>
+    <sys:String x:Key="Btn_LoadWorkflow">📂 Load</sys:String>
+    <sys:String x:Key="Workflow_Save_Title">Save Workflow</sys:String>
+    <sys:String x:Key="Workflow_Load_Title">Load Workflow</sys:String>
+    <sys:String x:Key="Workflow_NameLabel">Workflow Name</sys:String>
+    <sys:String x:Key="Workflow_Save_OK">Save</sys:String>
+    <sys:String x:Key="Workflow_Load_OK">Load</sys:String>
+    <sys:String x:Key="Workflow_Cancel">Cancel</sys:String>
+    <sys:String x:Key="Workflow_Delete">Delete</sys:String>
+    <sys:String x:Key="Workflow_ErrorEmpty">Please enter a workflow name.</sys:String>
+    <sys:String x:Key="Workflow_ConfirmOverwrite">A workflow with this name already exists. Overwrite?</sys:String>
+    <sys:String x:Key="Workflow_ConfirmDelete">Delete "{0}"?</sys:String>
+    <sys:String x:Key="Workflow_Load_Empty">No saved workflows.</sys:String>
+    <sys:String x:Key="Workflow_Load_NoSelection">Please select a workflow.</sys:String>
+    <sys:String x:Key="Workflow_Save_NoSteps">The pipeline is empty.</sys:String>
+    <sys:String x:Key="Workflow_Load_Failed">Could not load workflow. It contains methods that no longer exist.</sys:String>
+    <sys:String x:Key="Status_WorkflowSaved">Workflow saved</sys:String>
+    <sys:String x:Key="Status_WorkflowLoaded">Workflow loaded</sys:String>
+
 </ResourceDictionary>

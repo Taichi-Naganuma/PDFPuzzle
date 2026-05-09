@@ -356,6 +356,65 @@ namespace PDFPuzzle
             _property.Show();
         }
 
+        private void SaveWorkflow_Click(object sender, RoutedEventArgs e)
+        {
+            if (ExeItems.Count == 0)
+            {
+                MessageBox.Show(L("Workflow_Save_NoSteps"));
+                return;
+            }
+
+            var displayNames = ExeItems
+                .Where(i => !string.IsNullOrEmpty(i.DisplayName))
+                .Select(i => i.DisplayName!)
+                .ToList();
+            var suggested = WorkflowService.GenerateDefaultName(displayNames);
+
+            var dialog = new WorkflowSaveDialog(suggested) { Owner = this };
+            if (dialog.ShowDialog() != true) return;
+
+            var dto = new WorkflowDto
+            {
+                Name = dialog.WorkflowName,
+                CreatedAt = DateTime.Now,
+                StepKeys = ExeItems
+                    .Where(i => !string.IsNullOrEmpty(i.DisplayNameKey))
+                    .Select(i => i.DisplayNameKey!)
+                    .ToList()
+            };
+
+            if (WorkflowService.Save(dto))
+            {
+                StatusLabel.Content = L("Status_WorkflowSaved");
+                StatusLabel.Foreground = Brushes.DarkGreen;
+            }
+        }
+
+        private void LoadWorkflow_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new WorkflowLoadDialog { Owner = this };
+            if (dialog.ShowDialog() != true || dialog.SelectedWorkflow == null) return;
+
+            var newItems = new List<ExeItem>();
+            foreach (var key in dialog.SelectedWorkflow.StepKeys)
+            {
+                var method = MethodItems.FirstOrDefault(m => m.DisplayNameKey == key);
+                if (method == null)
+                {
+                    MessageBox.Show(L("Workflow_Load_Failed"));
+                    return;
+                }
+                var converted = _itemService.ConvertToExeitem(method.Clone());
+                if (converted != null) newItems.Add(converted);
+            }
+
+            ExeItems.Clear();
+            foreach (var item in newItems) ExeItems.Add(item);
+
+            StatusLabel.Content = L("Status_WorkflowLoaded");
+            StatusLabel.Foreground = Brushes.DarkGreen;
+        }
+
         private void Exit_Button_Click(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
 
         private void Rectangle_DragOver(object sender, DragEventArgs e)

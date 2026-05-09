@@ -63,4 +63,23 @@
     <sys:String x:Key="Msg_NoPageRange">抽出するページ番号が設定されていません。設定画面から設定してください。</sys:String>
     <sys:String x:Key="Msg_SelectMethod">処理メニューから追加したい処理を選択してください。</sys:String>
 
+    <sys:String x:Key="Btn_SaveWorkflow">💾 保存</sys:String>
+    <sys:String x:Key="Btn_LoadWorkflow">📂 読込</sys:String>
+    <sys:String x:Key="Workflow_Save_Title">ワークフローを保存</sys:String>
+    <sys:String x:Key="Workflow_Load_Title">ワークフローを読込</sys:String>
+    <sys:String x:Key="Workflow_NameLabel">ワークフロー名</sys:String>
+    <sys:String x:Key="Workflow_Save_OK">保存</sys:String>
+    <sys:String x:Key="Workflow_Load_OK">読込</sys:String>
+    <sys:String x:Key="Workflow_Cancel">キャンセル</sys:String>
+    <sys:String x:Key="Workflow_Delete">削除</sys:String>
+    <sys:String x:Key="Workflow_ErrorEmpty">ワークフロー名を入力してください。</sys:String>
+    <sys:String x:Key="Workflow_ConfirmOverwrite">同名のワークフローが既に存在します。上書きしますか？</sys:String>
+    <sys:String x:Key="Workflow_ConfirmDelete">「{0}」を削除します。よろしいですか？</sys:String>
+    <sys:String x:Key="Workflow_Load_Empty">保存済みのワークフローはありません。</sys:String>
+    <sys:String x:Key="Workflow_Load_NoSelection">ワークフローを選択してください。</sys:String>
+    <sys:String x:Key="Workflow_Save_NoSteps">パイプラインに処理が登録されていません。</sys:String>
+    <sys:String x:Key="Workflow_Load_Failed">ワークフローを読込めませんでした。処理メニューに存在しない項目が含まれています。</sys:String>
+    <sys:String x:Key="Status_WorkflowSaved">ワークフローを保存しました</sys:String>
+    <sys:String x:Key="Status_WorkflowLoaded">ワークフローを読込みました</sys:String>
+
 </ResourceDictionary>

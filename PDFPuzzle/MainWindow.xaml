@@ -213,6 +213,12 @@
                     Width="130" Height="36" Click="Exe_Button_Click"
                     Background="#D32F2F" Foreground="White"
                     FontWeight="Bold" FontSize="13" BorderThickness="0"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="8,0,0,0">
+                <Button Content="{DynamicResource Btn_SaveWorkflow}"
+                        MinWidth="72" Height="36" Click="SaveWorkflow_Click"/>
+                <Button Content="{DynamicResource Btn_LoadWorkflow}"
+                        MinWidth="72" Height="36" Click="LoadWorkflow_Click" Margin="4,0,0,0"/>
+            </StackPanel>
             <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="8,0,0,0">
                 <Button Content="{DynamicResource Btn_Settings}"
                         MinWidth="55" Height="36" Click="Settings_Button_Click"/>
