@@ -10,7 +10,11 @@ namespace PDFPuzzle
         public LicenseWindow()
         {
             InitializeComponent();
+            RefreshTierDisplay();
+        }
 
+        private void RefreshTierDisplay()
+        {
             var tier = LicenseService.GetCurrentTier();
             CurrentTierText.Text = LocalizationService.Get(tier == LicenseTier.Business
                 ? "Tier_Business" : "Tier_Personal");
@@ -29,6 +33,8 @@ namespace PDFPuzzle
             {
                 StatusText.Foreground = Brushes.DarkGreen;
                 StatusText.Text = LocalizationService.Get("License_Success");
+                // 認証で確定した階層をその場で反映（再起動を待たない）
+                RefreshTierDisplay();
                 await Task.Delay(800);
                 DialogResult = true;
             }

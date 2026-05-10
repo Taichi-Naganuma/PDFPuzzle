@@ -1,4 +1,4 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using System.Text.Json;
 
 namespace PDFPuzzle
@@ -8,19 +8,32 @@ namespace PDFPuzzle
         private const string ProductPermalink = "zjmmda";
         private const string VerifyUrl = "https://api.gumroad.com/v2/licenses/verify";
 
+#if DEBUG
+        // DEBUG 切替用環境変数（値: "Personal" / "Business"、大小無視）
+        private const string DebugTierEnvVar = "PDFPUZZLE_DEBUG_TIER";
+#endif
+
         public static bool IsActivated()
         {
 #if DEBUG
             return true;
-#endif
+#else
             var settings = AppSettings.Load();
             return !string.IsNullOrEmpty(settings.LicenseKey);
+#endif
         }
 
         public static LicenseTier GetCurrentTier()
         {
 #if DEBUG
-            return LicenseTier.Business;
+            // 環境変数優先。未設定 / 解釈不能なら AppSettings 値にフォールバック
+            var envValue = Environment.GetEnvironmentVariable(DebugTierEnvVar);
+            if (!string.IsNullOrWhiteSpace(envValue) &&
+                Enum.TryParse<LicenseTier>(envValue, ignoreCase: true, out var envTier))
+            {
+                return envTier;
+            }
+            return AppSettings.Load().LicenseTier;
 #else
             return AppSettings.Load().LicenseTier;
 #endif
@@ -50,8 +63,12 @@ namespace PDFPuzzle
 
                 if (success)
                 {
+                    // 階層を判定（判定不能時は Personal にフォールバック）
+                    var tier = LicenseTierResolver.Resolve(doc.RootElement);
+
                     var settings = AppSettings.Load();
                     settings.LicenseKey = licenseKey.Trim();
+                    settings.LicenseTier = tier;
                     settings.Save();
                     return (true, string.Empty);
                 }
@@ -75,8 +92,8 @@ namespace PDFPuzzle
         {
             var settings = AppSettings.Load();
             settings.LicenseKey = null;
+            settings.LicenseTier = LicenseTier.Personal;
             settings.Save();
         }
     }
 }
-
