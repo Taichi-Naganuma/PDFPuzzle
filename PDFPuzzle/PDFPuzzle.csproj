@@ -8,6 +8,14 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>PDFPuzzle</AssemblyName>
     <RootNamespace>PDFPuzzle</RootNamespace>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <!-- Version info (sync with installer/PDFPuzzle.iss #define AppVersion). v1.0.1 切替時は両方更新。 -->
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Product>PDFPuzzle</Product>
+    <Company>desk-fire</Company>
+    <Copyright>Copyright (c) 2026 desk-fire</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
