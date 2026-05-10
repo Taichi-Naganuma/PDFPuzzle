@@ -248,8 +248,22 @@ namespace PDFPuzzle
             {
                 var paths = (string[])e.Data.GetData(DataFormats.FileDrop);
                 if (paths != null)
-                    foreach (string s in paths.Where(p => p.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)))
+                {
+                    var pdfPaths = paths
+                        .Where(p => p.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                        .ToArray();
+
+                    // 個人版30ファイル上限ガード（事業者版は無制限）
+                    if (ExceedsPersonalLimit(pdfPaths.Length))
+                    {
+                        ShowUpgradeDialog();
+                        fileplace = null;
+                        return;
+                    }
+
+                    foreach (string s in pdfPaths)
                         FileItems.Add(new FileItem { Path = s, DisplayPath = Path.GetFileName(s) });
+                }
                 fileplace = null;
             }
             else if (e.Data.GetDataPresent(typeof(FileItem)))
@@ -300,9 +314,32 @@ namespace PDFPuzzle
         private void Ref_Button_Click(object sender, RoutedEventArgs e)
         {
             string[]? paths = _itemService.SelectFile();
-            if (paths != null)
-                foreach (string p in paths)
-                    FileItems.Add(new FileItem { Path = p, DisplayPath = Path.GetFileName(p) });
+            if (paths == null) return;
+
+            // 個人版30ファイル上限ガード（事業者版は無制限）
+            if (ExceedsPersonalLimit(paths.Length))
+            {
+                ShowUpgradeDialog();
+                return;
+            }
+
+            foreach (string p in paths)
+                FileItems.Add(new FileItem { Path = p, DisplayPath = Path.GetFileName(p) });
+        }
+
+        // 個人版で 既存リスト数 + 追加候補数 > 30 を超える場合 true。
+        // 事業者版は常に false（無制限追加可）。判定は LicenseService.GetCurrentTier() 経由。
+        private const int PersonalFileLimit = 30;
+        private bool ExceedsPersonalLimit(int additionCount)
+        {
+            if (LicenseService.GetCurrentTier() != LicenseTier.Personal) return false;
+            return FileItems.Count + additionCount > PersonalFileLimit;
+        }
+
+        private void ShowUpgradeDialog()
+        {
+            var dlg = new UpgradeDialog { Owner = this };
+            dlg.ShowDialog();
         }
 
         private void SelectFolder_Click(object sender, RoutedEventArgs e)

@@ -93,4 +93,27 @@
     <sys:String x:Key="Btn_ExportLogCsv">Export as CSV</sys:String>
     <sys:String x:Key="Msg_CsvExportDone">Exported {0} log entries.&#x0a;{1}</sys:String>
 
+    <!-- Upgrade dialog (file limit exceeded) -->
+    <sys:String x:Key="LimitDialog_Title">PDFPuzzle - Personal Edition</sys:String>
+    <sys:String x:Key="LimitDialog_Header">The Personal Edition supports up to 30 PDF files per batch</sys:String>
+    <sys:String x:Key="LimitDialog_Body">To process the 31st file and beyond, please upgrade to the Business Edition.</sys:String>
+    <sys:String x:Key="LimitDialog_FeaturesHeading">Business Edition features:</sys:String>
+    <sys:String x:Key="LimitDialog_Feature1">Unlimited files per batch</sys:String>
+    <sys:String x:Key="LimitDialog_Feature2">Process log export (JSON / CSV)</sys:String>
+    <sys:String x:Key="LimitDialog_Feature3">Commercial-use license</sys:String>
+    <sys:String x:Key="LimitDialog_Feature4">Install on multiple PCs</sys:String>
+    <sys:String x:Key="LimitDialog_OpenStore">View Business Edition</sys:String>
+    <sys:String x:Key="LimitDialog_Close">Close</sys:String>
+
+    <!-- LicenseWindow feature list -->
+    <sys:String x:Key="License_Features_Heading">Available features:</sys:String>
+    <sys:String x:Key="License_Features_Personal_1">Up to 30 files per batch</sys:String>
+    <sys:String x:Key="License_Features_Personal_2">3 core operations (Merge / Split / Extract)</sys:String>
+    <sys:String x:Key="License_Features_Personal_3">Workflow v1</sys:String>
+    <sys:String x:Key="License_Features_Business_1">Unlimited files per batch</sys:String>
+    <sys:String x:Key="License_Features_Business_2">Process log export (JSON / CSV)</sys:String>
+    <sys:String x:Key="License_Features_Business_3">Commercial-use license</sys:String>
+    <sys:String x:Key="License_Features_Business_4">Install on multiple PCs</sys:String>
+    <sys:String x:Key="License_Upgrade_Cta">Upgrade to Business Edition →</sys:String>
+
 </ResourceDictionary>

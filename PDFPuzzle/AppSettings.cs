@@ -15,6 +15,9 @@ namespace PDFPuzzle
         public string? WatermarkText { get; set; }
         public LicenseTier LicenseTier { get; set; } = LicenseTier.Personal;
 
+        // TODO(マーケ確認後): STORES 商品ページ URL を反映
+        public string StoresUpgradeUrl { get; set; } = "https://stores.jp/PLACEHOLDER";
+
         private static readonly string SettingsDir =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PDFPuzzle");
         private static readonly string SettingsPath = Path.Combine(SettingsDir, "settings.json");

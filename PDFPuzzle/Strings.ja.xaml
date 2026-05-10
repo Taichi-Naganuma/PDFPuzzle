@@ -93,4 +93,27 @@
     <sys:String x:Key="Btn_ExportLogCsv">CSVでエクスポート</sys:String>
     <sys:String x:Key="Msg_CsvExportDone">{0}件のログを書き出しました。&#x0a;{1}</sys:String>
 
+    <!-- アップグレード誘導ダイアログ（30ファイル超過時） -->
+    <sys:String x:Key="LimitDialog_Title">PDFPuzzle - 個人版</sys:String>
+    <sys:String x:Key="LimitDialog_Header">個人版では一度に処理できる PDF は 30 ファイルまでです</sys:String>
+    <sys:String x:Key="LimitDialog_Body">31 ファイル目以降を処理するには、事業者版へのアップグレードが必要です。</sys:String>
+    <sys:String x:Key="LimitDialog_FeaturesHeading">事業者版の特長:</sys:String>
+    <sys:String x:Key="LimitDialog_Feature1">一度に処理できるファイル数 無制限</sys:String>
+    <sys:String x:Key="LimitDialog_Feature2">処理ログ機能（JSON / CSV 出力）</sys:String>
+    <sys:String x:Key="LimitDialog_Feature3">商用利用ライセンス</sys:String>
+    <sys:String x:Key="LimitDialog_Feature4">複数 PC でのインストール可</sys:String>
+    <sys:String x:Key="LimitDialog_OpenStore">事業者版を見る</sys:String>
+    <sys:String x:Key="LimitDialog_Close">閉じる</sys:String>
+
+    <!-- LicenseWindow 機能リスト -->
+    <sys:String x:Key="License_Features_Heading">ご利用いただける機能:</sys:String>
+    <sys:String x:Key="License_Features_Personal_1">一度に処理できるファイル数 30 まで</sys:String>
+    <sys:String x:Key="License_Features_Personal_2">既存 3 処理（結合・分割・抽出）</sys:String>
+    <sys:String x:Key="License_Features_Personal_3">ワークフロー機能v1</sys:String>
+    <sys:String x:Key="License_Features_Business_1">一度に処理できるファイル数 無制限</sys:String>
+    <sys:String x:Key="License_Features_Business_2">処理ログ機能（JSON / CSV 出力）</sys:String>
+    <sys:String x:Key="License_Features_Business_3">商用利用ライセンス</sys:String>
+    <sys:String x:Key="License_Features_Business_4">複数 PC でのインストール可</sys:String>
+    <sys:String x:Key="License_Upgrade_Cta">事業者版へアップグレード →</sys:String>
+
 </ResourceDictionary>

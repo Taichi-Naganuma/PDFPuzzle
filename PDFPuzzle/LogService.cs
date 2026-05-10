@@ -132,6 +132,30 @@ namespace PDFPuzzle
             return field;
         }
 
+        // 単発の操作ログ（UpgradeDialog 等のテレメトリ用）。
+        // 既存 RunLogEntry スキーマを流用し、1 件 1 ステップの run として記録する。
+        // 失敗しても呼出側に例外を伝播しない（ログ取得失敗で UI を止めない設計）。
+        public static void LogAction(string action)
+        {
+            try
+            {
+                var run = new RunLogEntry();
+                run.Steps.Add(new StepLogEntry
+                {
+                    MethodKey = action,
+                    MethodName = action,
+                    StartedAt = run.StartedAt,
+                    CompletedAt = DateTime.Now,
+                    Success = true,
+                });
+                EndRun(run);
+            }
+            catch
+            {
+                // never throw to caller
+            }
+        }
+
         public static void EndRun(RunLogEntry run)
         {
             run.CompletedAt = DateTime.Now;

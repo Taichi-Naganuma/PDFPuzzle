@@ -18,6 +18,30 @@ namespace PDFPuzzle
             var tier = LicenseService.GetCurrentTier();
             CurrentTierText.Text = LocalizationService.Get(tier == LicenseTier.Business
                 ? "Tier_Business" : "Tier_Personal");
+
+            // 階層別の機能リスト + CTA ボタンの出し分け
+            bool isBusiness = tier == LicenseTier.Business;
+            PersonalFeaturesPanel.Visibility = isBusiness ? Visibility.Collapsed : Visibility.Visible;
+            BusinessFeaturesPanel.Visibility = isBusiness ? Visibility.Visible : Visibility.Collapsed;
+            UpgradeCtaButton.Visibility = isBusiness ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void UpgradeCtaButton_Click(object sender, RoutedEventArgs e)
+        {
+            LogService.LogAction("UpgradeDialog_OpenedStore");
+            try
+            {
+                var url = AppSettings.Load().StoresUpgradeUrl;
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true,
+                });
+            }
+            catch
+            {
+                // 既定ブラウザ起動失敗時もウィンドウは維持
+            }
         }
 
         private async void ActivateButton_Click(object sender, RoutedEventArgs e)
