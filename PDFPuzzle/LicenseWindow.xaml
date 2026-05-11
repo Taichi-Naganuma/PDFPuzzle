@@ -21,19 +21,19 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- 繧ｿ繧､繝医Ν -->
+        <!-- タイトル -->
         <TextBlock Grid.Row="0"
                    Text="{DynamicResource License_Title}"
                    FontSize="16" FontWeight="Bold"
                    Foreground="#1565C0" Margin="0,0,0,12"/>
 
-        <!-- 隱ｬ譏取枚 -->
+        <!-- 説明文 -->
         <TextBlock Grid.Row="1"
                    Text="{DynamicResource License_Instruction}"
                    TextWrapping="Wrap" Foreground="#424242"
                    FontSize="12" Margin="0,0,0,12"/>
 
-        <!-- 迴ｾ蝨ｨ縺ｮ繝ｩ繧､繧ｻ繝ｳ繧ｹ髫主ｱ､ -->
+        <!-- 現在のライセンス階層 -->
         <TextBlock Grid.Row="2"
                    FontSize="11" Foreground="#1565C0"
                    Margin="0,0,0,8">
@@ -93,24 +93,24 @@
                 Visibility="Collapsed"
                 Click="UpgradeCtaButton_Click"/>
 
-        <!-- 繝ｩ繧､繧ｻ繝ｳ繧ｹ繧ｭ繝ｼ繝ｩ繝吶Ν -->
+        <!-- ライセンスキーラベル -->
         <TextBlock Grid.Row="6"
                    Text="{DynamicResource License_KeyLabel}"
                    FontWeight="SemiBold" Foreground="#424242"
                    FontSize="12" Margin="0,0,0,6"/>
 
-        <!-- 繝ｩ繧､繧ｻ繝ｳ繧ｹ繧ｭ繝ｼ蜈･蜉・-->
+        <!-- ライセンスキー入力 -->
         <TextBox x:Name="LicenseKeyBox" Grid.Row="7"
                  Height="36" FontSize="13"
                  VerticalContentAlignment="Center" Padding="8,0"
                  BorderBrush="#BDBDBD" BorderThickness="1"/>
 
-        <!-- 繧ｨ繝ｩ繝ｼ繝ｻ繧ｹ繝・・繧ｿ繧ｹ繝｡繝・そ繝ｼ繧ｸ -->
+        <!-- エラー・ステータスメッセージ -->
         <TextBlock x:Name="StatusText" Grid.Row="8"
                    TextWrapping="Wrap" FontSize="11"
                    Margin="0,8,0,0" VerticalAlignment="Top"/>
 
-        <!-- 繝懊ち繝ｳ陦・-->
+        <!-- ボタン行 -->
         <Grid Grid.Row="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
