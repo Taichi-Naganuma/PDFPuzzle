@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Navigation;
+using PDFPuzzle.Utilities;
 
 namespace PDFPuzzle
 {
@@ -28,6 +29,7 @@ namespace PDFPuzzle
 
         private void UpgradeCtaButton_Click(object sender, RoutedEventArgs e)
         {
+            WiringGuard.WarnIfWrongSender(sender, "UpgradeCtaButton");
             LogService.LogAction("UpgradeDialog_OpenedStore");
             try
             {
@@ -46,6 +48,7 @@ namespace PDFPuzzle
 
         private async void ActivateButton_Click(object sender, RoutedEventArgs e)
         {
+            WiringGuard.WarnIfWrongSender(sender, "ActivateButton");
             ActivateButton.IsEnabled = false;
             CancelButton.IsEnabled = false;
             StatusText.Foreground = Brushes.Gray;
@@ -73,6 +76,7 @@ namespace PDFPuzzle
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
+            WiringGuard.WarnIfWrongSender(sender, "CancelButton");
             DialogResult = false;
         }
 

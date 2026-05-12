@@ -63,16 +63,19 @@
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="0"
+                    x:Name="DeleteButton"
                     Content="{DynamicResource Workflow_Delete}"
                     Width="90" Height="32"
                     Click="DeleteButton_Click"/>
 
             <Button Grid.Column="2"
+                    x:Name="CancelButton"
                     Content="{DynamicResource Workflow_Cancel}"
                     Width="80" Height="32"
                     Click="CancelButton_Click"/>
 
             <Button Grid.Column="4"
+                    x:Name="LoadButton"
                     Content="{DynamicResource Workflow_Load_OK}"
                     Width="100" Height="32"
                     Background="#1565C0" Foreground="White"

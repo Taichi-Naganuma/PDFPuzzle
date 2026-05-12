@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
+using PDFPuzzle.Utilities;
 
 namespace PDFPuzzle
 {
@@ -36,9 +37,17 @@ namespace PDFPuzzle
             EmptyHint.Visibility = _rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        private void LoadButton_Click(object sender, RoutedEventArgs e) => TryLoadSelected();
+        private void LoadButton_Click(object sender, RoutedEventArgs e)
+        {
+            WiringGuard.WarnIfWrongSender(sender, "LoadButton");
+            TryLoadSelected();
+        }
 
-        private void WorkflowList_MouseDoubleClick(object sender, MouseButtonEventArgs e) => TryLoadSelected();
+        private void WorkflowList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            WiringGuard.WarnIfWrongSender(sender, "WorkflowList");
+            TryLoadSelected();
+        }
 
         private void TryLoadSelected()
         {
@@ -54,6 +63,7 @@ namespace PDFPuzzle
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
+            WiringGuard.WarnIfWrongSender(sender, "DeleteButton");
             if (WorkflowList.SelectedItem is not WorkflowRow row)
             {
                 StatusText.Text = LocalizationService.Get("Workflow_Load_NoSelection");
@@ -74,6 +84,7 @@ namespace PDFPuzzle
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
+            WiringGuard.WarnIfWrongSender(sender, "CancelButton");
             DialogResult = false;
             Close();
         }
