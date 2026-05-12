@@ -1,0 +1,380 @@
+<#
+.SYNOPSIS
+    Inno Setup 等で生成された EXE インストーラに対して SSL.com EV
+    コードサイニング証明書 (eSigner cloud HSM) で署名する雛形スクリプト。
+    証明書ファイル (.pfx) を持っていない時期は -DryRun で空運転可能。
+
+.DESCRIPTION
+    SSL.com Sole Proprietor EV Code Signing Certificate と eSigner クラウド HSM
+    を前提とする。EV 証明書では物理 USB トークンは存在せず、署名は SSL.com 公式の
+    CodeSignTool.bat (Java ベース CLI) 経由で行うのが推奨経路。
+    https://www.ssl.com/guide/esigner-codesigntool-command-guide/
+
+    本ファイルは TEMPLATE であり、そのまま動作する正式版ではない。
+    Sala は本ファイルを installer\sign-installer.ps1 にコピーした上で、
+    # TODO(Sala): マーカーを順次解消して正式版を作成する。
+
+.PARAMETER InstallerPath
+    署名対象の EXE インストーラへの絶対パス (例: ...\installer\output\PDFPuzzle_Setup_v1.0.0.exe)
+
+.PARAMETER DryRun
+    指定すると CodeSignTool / signtool への実呼出を行わず、引数組立結果のみ出力。
+    証明書未到着期間中、または CI 環境で機密が無い場合の空運転テスト用。
+
+.PARAMETER UseESigner
+    SSL.com eSigner CodeSignTool 経由で署名する (EV 推奨経路)。
+    デフォルト $true。$false にすると signtool.exe 直呼びパス
+    (本テンプレートでは未実装、Sala が将来必要なら追加)。
+
+.PARAMETER TimestampUrl
+    タイムスタンプサーバ URL。デフォルト http://ts.ssl.com。
+    CodeSignTool は内部でタイムスタンプを付与する。タイムスタンプなしの署名は
+    EV 期限切れ後に検証失敗するため、本パラメータは必ず指定される設計。
+
+.PARAMETER CodeSignToolPath
+    SSL.com CodeSignTool.bat の絶対パス。
+    既定は $env:ProgramFiles\SSL.com\CodeSignTool\CodeSignTool.bat。
+    インストール場所が異なる場合は引数指定。
+
+.PARAMETER SigntoolPath
+    Windows SDK 付属 signtool.exe の絶対パス (署名検証用)。
+    未指定時は where signtool で自動解決を試みる。
+
+.PARAMETER OutputDir
+    署名後 EXE の出力ディレクトリ。既定は InstallerPath と同じディレクトリ。
+    既定では -override 相当の上書き動作になる。
+
+.EXAMPLE
+    # 証明書未到着期の空運転テスト (Sala が 5/13-20 に実施)
+    .\sign-installer.ps1 -InstallerPath "C:\...\PDFPuzzle_Setup_v1.0.0.exe" -DryRun
+
+.EXAMPLE
+    # 証明書到着後の実署名 (John が 6/3 以降に実施)
+    $env:ESIGNER_USERNAME = "owner@example.com"
+    $env:ESIGNER_PASSWORD = "..."
+    $env:ESIGNER_TOTP_SECRET = "..."
+    $env:ESIGNER_CREDENTIAL_ID = "..."
+    .\sign-installer.ps1 -InstallerPath "C:\...\PDFPuzzle_Setup_v1.0.1.exe"
+
+.NOTES
+    機密情報 (ESIGNER_USERNAME / ESIGNER_PASSWORD / ESIGNER_TOTP_SECRET /
+    ESIGNER_CREDENTIAL_ID) はスクリプト内に絶対に書かない。
+    すべて環境変数経由で受ける。ログ出力時は password / totp_secret を
+    "****" でマスクすること。
+
+    本テンプレートは PowerShell 5.1 (Windows 既定) で動作する。
+    PowerShell 7 専用機能 (??, ?. 等) は使わない。
+
+    対象製品の固有名 (PDFPuzzle / ImagePuzzle / ExcelPuzzle) はスクリプト内に
+    書かない。すべて InstallerPath から派生させる。
+#>
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$InstallerPath,
+
+    [switch]$DryRun,
+
+    [bool]$UseESigner = $true,
+
+    [string]$TimestampUrl = "http://ts.ssl.com",
+
+    [string]$CodeSignToolPath = (Join-Path $env:ProgramFiles "SSL.com\CodeSignTool\CodeSignTool.bat"),
+
+    [string]$SigntoolPath = "",
+
+    [string]$OutputDir = ""
+)
+
+$ErrorActionPreference = "Stop"
+
+# ============================================================
+# Section 1: Logging helpers
+# ============================================================
+
+function Write-SignLog {
+    param([string]$Message, [string]$Level = "INFO")
+    $ts = (Get-Date).ToString("HH:mm:ss")
+    Write-Host "[sign $ts $Level] $Message"
+}
+
+function Write-SignError {
+    param([string]$Message)
+    Write-SignLog -Message $Message -Level "ERROR"
+}
+
+function Mask-Secret {
+    param([string]$Value)
+    if ([string]::IsNullOrEmpty($Value)) { return "<empty>" }
+    return "****"
+}
+
+# ============================================================
+# Section 2: Pre-flight validation
+# ============================================================
+
+function Test-InstallerPath {
+    param([string]$Path)
+    if (-not (Test-Path -Path $Path -PathType Leaf)) {
+        Write-SignError "InstallerPath not found: $Path"
+        exit 2
+    }
+    $ext = [System.IO.Path]::GetExtension($Path)
+    if ($ext -ne ".exe") {
+        Write-SignError "InstallerPath must be a .exe file. Got: $ext"
+        exit 2
+    }
+    Write-SignLog "Installer file exists: $Path"
+}
+
+function Get-ProductMetadata {
+    <#
+    InstallerPath のファイル名から ProductName と Version を抽出する。
+    想定パターン: <ProductName>_Setup_v<Version>.exe
+    例: PDFPuzzle_Setup_v1.0.0.exe -> ProductName=PDFPuzzle, Version=1.0.0
+    パターン不一致時は ProductName=ファイル名 stem, Version=unknown を返す。
+    #>
+    param([string]$Path)
+    $stem = [System.IO.Path]::GetFileNameWithoutExtension($Path)
+    $match = [regex]::Match($stem, '^(?<name>.+?)_Setup_v(?<ver>[0-9]+\.[0-9]+\.[0-9]+(?:\.[0-9]+)?)$')
+    if ($match.Success) {
+        return @{
+            ProductName = $match.Groups['name'].Value
+            Version     = $match.Groups['ver'].Value
+        }
+    }
+    Write-SignLog "Filename does not match <Product>_Setup_v<Version>.exe pattern. Falling back to stem." "WARN"
+    return @{
+        ProductName = $stem
+        Version     = "unknown"
+    }
+}
+
+# ============================================================
+# Section 3: Environment variable resolution
+# ============================================================
+
+function Get-ESignerCredentials {
+    <#
+    Real-sign 時は4変数すべてが必須。未設定は exit 1。
+    DryRun 時は未設定でも継続するが、set/unset を表示。
+    #>
+    param([switch]$RequireAll)
+
+    $creds = @{
+        Username     = $env:ESIGNER_USERNAME
+        Password     = $env:ESIGNER_PASSWORD
+        TotpSecret   = $env:ESIGNER_TOTP_SECRET
+        CredentialId = $env:ESIGNER_CREDENTIAL_ID
+    }
+
+    $missing = @()
+    foreach ($k in $creds.Keys) {
+        $set = -not [string]::IsNullOrWhiteSpace($creds[$k])
+        $status = if ($set) { "set" } else { "unset" }
+        Write-SignLog "  env ESIGNER_$($k.ToUpper()): $status"
+        if (-not $set) { $missing += $k }
+    }
+
+    if ($RequireAll -and $missing.Count -gt 0) {
+        Write-SignError "Missing required environment variables for real-sign: $($missing -join ', ')"
+        Write-SignError "Set ESIGNER_USERNAME / ESIGNER_PASSWORD / ESIGNER_TOTP_SECRET / ESIGNER_CREDENTIAL_ID and rerun."
+        exit 1
+    }
+
+    return $creds
+}
+
+# ============================================================
+# Section 4: CodeSignTool command assembly
+# ============================================================
+
+function Build-CodeSignToolArgs {
+    <#
+    SSL.com CodeSignTool.bat sign サブコマンドの引数列を組み立てる。
+    公式リファレンス: https://www.ssl.com/guide/esigner-codesigntool-command-guide/
+
+    返り値: ハッシュテーブル
+      - Raw  : 実呼出用引数配列 (パスワード等が生で含まれる)
+      - Safe : ログ出力用引数配列 (パスワード等が **** マスク)
+    #>
+    param(
+        [string]$InputFile,
+        [string]$OutputDirectory,
+        [hashtable]$Credentials
+    )
+
+    $rawArgs = @(
+        "sign",
+        "-input_file_path=$InputFile",
+        "-output_dir_path=$OutputDirectory",
+        "-credential_id=$($Credentials.CredentialId)",
+        "-username=$($Credentials.Username)",
+        "-password=$($Credentials.Password)",
+        "-totp_secret=$($Credentials.TotpSecret)",
+        "-override"
+    )
+
+    $safeArgs = @(
+        "sign",
+        "-input_file_path=$InputFile",
+        "-output_dir_path=$OutputDirectory",
+        "-credential_id=$(Mask-Secret $Credentials.CredentialId)",
+        "-username=$($Credentials.Username)",
+        "-password=$(Mask-Secret $Credentials.Password)",
+        "-totp_secret=$(Mask-Secret $Credentials.TotpSecret)",
+        "-override"
+    )
+
+    return @{
+        Raw  = $rawArgs
+        Safe = $safeArgs
+    }
+}
+
+# ============================================================
+# Section 5: Signing execution
+# ============================================================
+
+function Invoke-CodeSignTool {
+    param(
+        [string]$ToolPath,
+        [string[]]$RawArgs,
+        [string[]]$SafeArgs
+    )
+
+    if (-not (Test-Path $ToolPath -PathType Leaf)) {
+        Write-SignError "CodeSignTool.bat not found at: $ToolPath"
+        Write-SignError "Install SSL.com CodeSignTool or specify -CodeSignToolPath."
+        exit 3
+    }
+
+    Write-SignLog "Invoking CodeSignTool.bat (args masked):"
+    Write-SignLog "  $ToolPath $($SafeArgs -join ' ')"
+
+    # TODO(Sala): & "$ToolPath" @RawArgs で実呼出し、$LASTEXITCODE を取得して非ゼロなら失敗。
+    # 注意: パスワード等を含む RawArgs を Write-Host しないこと。
+    # 例:
+    #     & "$ToolPath" @RawArgs
+    #     $exitCode = $LASTEXITCODE
+    #     if ($exitCode -ne 0) { ... }
+
+    throw "Invoke-CodeSignTool: not implemented yet. Sala must complete this function."
+}
+
+# ============================================================
+# Section 6: Signature verification (post-sign)
+# ============================================================
+
+function Resolve-SigntoolPath {
+    param([string]$Hint)
+    if (-not [string]::IsNullOrEmpty($Hint)) {
+        if (Test-Path $Hint -PathType Leaf) { return $Hint }
+        Write-SignError "Specified SigntoolPath not found: $Hint"
+        exit 4
+    }
+    # where signtool で解決を試みる
+    $found = $null
+    try {
+        $whereOutput = & where.exe signtool 2>$null
+        if ($LASTEXITCODE -eq 0 -and $whereOutput) {
+            $found = ($whereOutput -split "`r?`n")[0].Trim()
+        }
+    } catch { }
+    if ($found -and (Test-Path $found -PathType Leaf)) {
+        return $found
+    }
+    # TODO(Sala): Windows SDK 配下の代表的パスを順次試す候補リスト実装を推奨。
+    # 例: C:\Program Files (x86)\Windows Kits\10\bin\<version>\x64\signtool.exe
+    Write-SignError "signtool.exe not found in PATH. Install Windows SDK or specify -SigntoolPath."
+    exit 4
+}
+
+function Test-Signature {
+    param([string]$Path, [string]$Signtool)
+
+    Write-SignLog "Verifying signature: $Signtool verify /pa /v `"$Path`""
+
+    # TODO(Sala): & "$Signtool" verify /pa /v "$Path" を実行し、$LASTEXITCODE が 0 なら成功。
+    # 出力中に "Successfully verified" を含むか確認。
+    # 失敗時は exit 5。
+
+    throw "Test-Signature: not implemented yet. Sala must complete this function."
+}
+
+# ============================================================
+# Section 7: Main flow
+# ============================================================
+
+function Main {
+    Write-SignLog "==================================================================="
+    Write-SignLog "Code Signing Script (template version)"
+    Write-SignLog "Mode: $(if ($DryRun) { 'DryRun' } else { 'real-sign' })"
+    Write-SignLog "InstallerPath: $InstallerPath"
+    Write-SignLog "==================================================================="
+
+    # Step 1: validate installer
+    Test-InstallerPath -Path $InstallerPath
+
+    # Step 2: derive metadata
+    $meta = Get-ProductMetadata -Path $InstallerPath
+    Write-SignLog "Product : $($meta.ProductName)"
+    Write-SignLog "Version : $($meta.Version)"
+
+    # Step 3: determine output dir
+    if ([string]::IsNullOrEmpty($OutputDir)) {
+        $OutputDir = [System.IO.Path]::GetDirectoryName($InstallerPath)
+    }
+    Write-SignLog "OutputDir: $OutputDir"
+
+    # Step 4: env vars
+    Write-SignLog "Checking ESIGNER_* environment variables..."
+    $creds = Get-ESignerCredentials -RequireAll:(-not $DryRun)
+
+    # Step 5: assemble args
+    $built = Build-CodeSignToolArgs -InputFile $InstallerPath -OutputDirectory $OutputDir -Credentials $creds
+
+    Write-SignLog "CodeSignTool.bat path: $CodeSignToolPath"
+    Write-SignLog "CodeSignTool args (masked):"
+    foreach ($a in $built.Safe) { Write-SignLog "  $a" }
+
+    # Step 6: DryRun branch
+    if ($DryRun) {
+        Write-SignLog "TimestampUrl: $TimestampUrl"
+        Write-SignLog "UseESigner  : $UseESigner"
+        Write-SignLog ""
+        Write-SignLog "DryRun complete. No actual signing performed."
+        Write-SignLog "Next step: set ESIGNER_* environment variables and rerun without -DryRun."
+        exit 0
+    }
+
+    # Step 7: real-sign
+    if (-not $UseESigner) {
+        Write-SignError "-UseESigner:`$false (signtool.exe direct path) is not implemented in this template."
+        Write-SignError "SSL.com EV requires CodeSignTool. Keep -UseESigner `$true."
+        exit 6
+    }
+
+    Invoke-CodeSignTool -ToolPath $CodeSignToolPath -RawArgs $built.Raw -SafeArgs $built.Safe
+
+    # Step 8: verify
+    $signtool = Resolve-SigntoolPath -Hint $SigntoolPath
+    Test-Signature -Path $InstallerPath -Signtool $signtool
+
+    Write-SignLog "==================================================================="
+    Write-SignLog "Signing + verification complete for $($meta.ProductName) v$($meta.Version)"
+    Write-SignLog "==================================================================="
+    exit 0
+}
+
+# ============================================================
+# Entry point
+# ============================================================
+
+try {
+    Main
+} catch {
+    Write-SignError "Unhandled exception: $($_.Exception.Message)"
+    Write-SignError $_.ScriptStackTrace
+    exit 99
+}
