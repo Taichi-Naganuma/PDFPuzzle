@@ -23,6 +23,12 @@ namespace PDFPuzzle
         public DateTime? CompletedAt { get; set; }
         public string? OutputFolder { get; set; }
         public List<StepLogEntry> Steps { get; set; } = new();
+
+        // チーム版監査フィールド（v0・第3次で追加）。
+        // nullable — 旧スキーマの既存ログは null でデシリアライズされる（後方互換）。
+        public string? UserName { get; set; }        // Environment.UserName を自動付与
+        public string? DeviceId { get; set; }        // DeviceIdentifier.GetCurrent() の短縮ハッシュ
+        public string? LicenseTierName { get; set; } // "Personal" / "Business" / "Team"
     }
 
     public class DailyLogFile
@@ -41,7 +47,27 @@ namespace PDFPuzzle
 
         public static RunLogEntry StartRun(string? outputFolder)
         {
-            return new RunLogEntry { OutputFolder = outputFolder };
+            var run = new RunLogEntry { OutputFolder = outputFolder };
+            PopulateAuditFields(run);
+            return run;
+        }
+
+        // チーム版監査フィールド（UserName / DeviceId / LicenseTierName）を付与する。
+        // 全 tier 無条件付与（ローカルログのみ・外部送信なし。仕様書 §4.3）。
+        // 付与失敗（レジストリ読取・tier 取得の例外）は呼出側へ伝播させず、
+        // 各フィールド null のまま継続する（LogService の「logging never throws」方針に整合）。
+        private static void PopulateAuditFields(RunLogEntry run)
+        {
+            try
+            {
+                run.UserName = Environment.UserName;
+                run.DeviceId = DeviceIdentifier.GetCurrent();
+                run.LicenseTierName = LicenseService.GetCurrentTier().ToString();
+            }
+            catch
+            {
+                // 監査フィールドの付与失敗で処理ログ自体を止めない
+            }
         }
 
         public static void AddStep(RunLogEntry run, StepLogEntry step) =>
@@ -122,6 +148,74 @@ namespace PDFPuzzle
             return rowCount;
         }
 
+        // チーム版監査用 CSV エクスポート（仕様書 §3.4）。
+        // 既存 ExportToCsv の15列の末尾に UserName / DeviceId / LicenseTierName の3列を
+        // 追加した計18列構成。ExportToCsv は不変（個人版破壊回避）。
+        // LoadAllRuns() → BuildAuditCsv() → File.WriteAllText の薄いラッパ。
+        public static int ExportTeamAuditCsv(string filePath)
+        {
+            var runs = LoadAllRuns();
+            var (csv, rowCount) = BuildAuditCsv(runs);
+            File.WriteAllText(filePath, csv, new UTF8Encoding(true));
+            return rowCount;
+        }
+
+        // 監査 CSV の行組み立て（純関数・ファイルシステム非依存）。
+        // 合成 RunLogEntry を渡して単体テスト可能。LogService に可変 static 状態は足さない。
+        // 戻り値: (CSV 本文, データ行数)。
+        internal static (string Csv, int RowCount) BuildAuditCsv(IEnumerable<RunLogEntry> runs)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("RunId,RunStartedAt,RunCompletedAt,OutputFolder,StepIndex,MethodKey,MethodName,StepStartedAt,StepCompletedAt,InputFileCount,InputFiles,OutputFileCount,OutputFiles,Success,ErrorMessage,UserName,DeviceId,LicenseTierName");
+
+            int rowCount = 0;
+            foreach (var run in runs)
+            {
+                if (run.Steps.Count == 0)
+                {
+                    var fields = new[]
+                    {
+                        run.RunId, FormatDate(run.StartedAt), FormatDate(run.CompletedAt),
+                        run.OutputFolder ?? "", "", "", "", "", "", "0", "", "0", "", "", "",
+                        run.UserName ?? "", run.DeviceId ?? "", run.LicenseTierName ?? ""
+                    };
+                    sb.AppendLine(string.Join(",", fields.Select(EscapeCsv)));
+                    rowCount++;
+                    continue;
+                }
+
+                for (int i = 0; i < run.Steps.Count; i++)
+                {
+                    var step = run.Steps[i];
+                    var fields = new[]
+                    {
+                        run.RunId,
+                        FormatDate(run.StartedAt),
+                        FormatDate(run.CompletedAt),
+                        run.OutputFolder ?? "",
+                        (i + 1).ToString(),
+                        step.MethodKey ?? "",
+                        step.MethodName ?? "",
+                        FormatDate(step.StartedAt),
+                        FormatDate(step.CompletedAt),
+                        step.InputFiles.Count.ToString(),
+                        string.Join(" | ", step.InputFiles),
+                        step.OutputFiles.Count.ToString(),
+                        string.Join(" | ", step.OutputFiles),
+                        step.Success ? "Success" : "Failure",
+                        step.ErrorMessage ?? "",
+                        run.UserName ?? "",
+                        run.DeviceId ?? "",
+                        run.LicenseTierName ?? ""
+                    };
+                    sb.AppendLine(string.Join(",", fields.Select(EscapeCsv)));
+                    rowCount++;
+                }
+            }
+
+            return (sb.ToString(), rowCount);
+        }
+
         private static string FormatDate(DateTime? dt) =>
             dt.HasValue ? dt.Value.ToString("yyyy/MM/dd HH:mm:ss") : "";
 
@@ -140,6 +234,7 @@ namespace PDFPuzzle
             try
             {
                 var run = new RunLogEntry();
+                PopulateAuditFields(run);
                 run.Steps.Add(new StepLogEntry
                 {
                     MethodKey = action,

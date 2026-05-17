@@ -464,4 +464,180 @@ namespace PDFPuzzle.Tests
             Assert.Equal("alice", dev1.UserName);
         }
     }
+
+    // ---------------------------------------------------------------
+    // 3-A. LogService.StartRun — 監査フィールドの自動付与（第3次）
+    // ---------------------------------------------------------------
+    public class LogServiceAuditFieldsTest
+    {
+        [Fact]
+        public void StartRun_PopulatesUserName_MatchesEnvironment()
+        {
+            var run = LogService.StartRun(null);
+            Assert.Equal(Environment.UserName, run.UserName);
+        }
+
+        [Fact]
+        public void StartRun_PopulatesDeviceId_MatchesDeviceIdentifier()
+        {
+            var run = LogService.StartRun(null);
+            Assert.Equal(DeviceIdentifier.GetCurrent(), run.DeviceId);
+            Assert.NotNull(run.DeviceId);
+            Assert.Equal(16, run.DeviceId!.Length);
+            Assert.Matches("^[0-9a-f]{16}$", run.DeviceId);
+        }
+
+        [Fact]
+        public void StartRun_PopulatesLicenseTierName_IsKnownTier()
+        {
+            var run = LogService.StartRun(null);
+            Assert.NotNull(run.LicenseTierName);
+            Assert.Contains(run.LicenseTierName, new[] { "Personal", "Business", "Team" });
+        }
+
+        [Fact]
+        public void StartRun_PreservesOutputFolder()
+        {
+            var run = LogService.StartRun(@"C:\out");
+            Assert.Equal(@"C:\out", run.OutputFolder);
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // 3-B. RunLogEntry — 旧スキーマ JSON の後方互換（第3次）
+    // ---------------------------------------------------------------
+    public class RunLogEntryBackCompatTest
+    {
+        [Fact]
+        public void Deserialize_LegacyJsonWithoutAuditFields_AuditFieldsAreNull()
+        {
+            // 監査フィールド3つを持たない旧スキーマ相当の JSON。
+            var json = """{"RunId":"abc-123","StartedAt":"2026-01-01T10:00:00","Steps":[]}""";
+            var run = JsonSerializer.Deserialize<RunLogEntry>(json);
+
+            Assert.NotNull(run);
+            Assert.Equal("abc-123", run!.RunId);
+            Assert.Null(run.UserName);
+            Assert.Null(run.DeviceId);
+            Assert.Null(run.LicenseTierName);
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // 3-C. LogService.BuildAuditCsv — 監査 CSV 行組み立て（第3次）
+    // ---------------------------------------------------------------
+    public class BuildAuditCsvTest
+    {
+        private static StepLogEntry MakeStep(string key) => new()
+        {
+            MethodKey = key,
+            MethodName = key,
+            StartedAt = new DateTime(2026, 1, 1, 10, 0, 0),
+            CompletedAt = new DateTime(2026, 1, 1, 10, 0, 5),
+            Success = true,
+        };
+
+        [Fact]
+        public void BuildAuditCsv_Header_Has18Columns_LastThreeAreAuditColumns()
+        {
+            var (csv, _) = LogService.BuildAuditCsv(new List<RunLogEntry>());
+            var header = csv.Split('\n')[0].TrimEnd('\r');
+            var cols = header.Split(',');
+
+            Assert.Equal(18, cols.Length);
+            Assert.Equal("UserName", cols[15]);
+            Assert.Equal("DeviceId", cols[16]);
+            Assert.Equal("LicenseTierName", cols[17]);
+        }
+
+        [Fact]
+        public void BuildAuditCsv_RunWithSteps_DataRowsCarryAuditValues()
+        {
+            var run = new RunLogEntry
+            {
+                RunId = "run-1",
+                UserName = "alice",
+                DeviceId = "abcdef0123456789",
+                LicenseTierName = "Team",
+                Steps = { MakeStep("merge"), MakeStep("split") },
+            };
+
+            var (csv, rowCount) = LogService.BuildAuditCsv(new[] { run });
+            Assert.Equal(2, rowCount);
+
+            var lines = csv.Split('\n').Where(l => l.Length > 0).Select(l => l.TrimEnd('\r')).ToArray();
+            // [0] = header, [1]/[2] = data rows
+            foreach (var dataLine in new[] { lines[1], lines[2] })
+            {
+                var cols = dataLine.Split(',');
+                Assert.Equal(18, cols.Length);
+                Assert.Equal("alice", cols[15]);
+                Assert.Equal("abcdef0123456789", cols[16]);
+                Assert.Equal("Team", cols[17]);
+            }
+        }
+
+        [Fact]
+        public void BuildAuditCsv_RunWithZeroSteps_EmitsOneRow_WithAuditValues()
+        {
+            var run = new RunLogEntry
+            {
+                RunId = "run-empty",
+                UserName = "bob",
+                DeviceId = "0011223344556677",
+                LicenseTierName = "Business",
+            };
+
+            var (csv, rowCount) = LogService.BuildAuditCsv(new[] { run });
+            Assert.Equal(1, rowCount);
+
+            var lines = csv.Split('\n').Where(l => l.Length > 0).Select(l => l.TrimEnd('\r')).ToArray();
+            var cols = lines[1].Split(',');
+            Assert.Equal(18, cols.Length);
+            Assert.Equal("bob", cols[15]);
+            Assert.Equal("0011223344556677", cols[16]);
+            Assert.Equal("Business", cols[17]);
+        }
+
+        [Fact]
+        public void BuildAuditCsv_NullUserName_EmitsEmptyString()
+        {
+            var run = new RunLogEntry
+            {
+                RunId = "run-null",
+                UserName = null,
+                DeviceId = null,
+                LicenseTierName = null,
+            };
+
+            var (csv, _) = LogService.BuildAuditCsv(new[] { run });
+            var lines = csv.Split('\n').Where(l => l.Length > 0).Select(l => l.TrimEnd('\r')).ToArray();
+            var cols = lines[1].Split(',');
+
+            Assert.Equal(18, cols.Length);
+            Assert.Equal("", cols[15]);
+            Assert.Equal("", cols[16]);
+            Assert.Equal("", cols[17]);
+        }
+
+        [Fact]
+        public void BuildAuditCsv_UserNameWithCommaAndQuote_IsEscaped()
+        {
+            var run = new RunLogEntry
+            {
+                RunId = "run-esc",
+                UserName = "doe, \"jane\"",
+                DeviceId = "ffffffffffffffff",
+                LicenseTierName = "Team",
+            };
+
+            var (csv, _) = LogService.BuildAuditCsv(new[] { run });
+            var lines = csv.Split('\n').Where(l => l.Length > 0).Select(l => l.TrimEnd('\r')).ToArray();
+            var dataLine = lines[1];
+
+            // カンマ・ダブルクォートを含む UserName が EscapeCsv 経由でクォートされること。
+            // クォート内のカンマで列が割れないよう、クォート済みフィールドを含む形を検証。
+            Assert.Contains("\"doe, \"\"jane\"\"\"", dataLine);
+        }
+    }
 }
