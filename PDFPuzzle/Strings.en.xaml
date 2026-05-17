@@ -41,6 +41,13 @@
     <sys:String x:Key="Settings_Extract_PageRangeNote">Example: 1,3,5-8 (comma-separated, hyphen for ranges)</sys:String>
     <sys:String x:Key="Settings_Output_Options">Output Options</sys:String>
     <sys:String x:Key="Settings_Output_OpenFolder">Open output folder automatically after processing</sys:String>
+    <sys:String x:Key="Settings_Tab_WorkflowShare">Workflow Sharing</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_Header">Shared Workflow Folder</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_Description">Specify a shared folder (e.g. an office file server) to share saved workflows across multiple devices. If not set, workflows are stored only on this device.</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_CurrentLabel">Current shared folder:</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_None">Not shared (this device only)</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_Browse">Browse...</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_Clear">Stop sharing</sys:String>
     <sys:String x:Key="Btn_OK">OK</sys:String>
 
     <sys:String x:Key="Method_Merge">Merge PDFs</sys:String>

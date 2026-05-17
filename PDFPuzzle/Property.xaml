@@ -56,6 +56,28 @@
                 </StackPanel>
             </TabItem>
 
+            <!-- Workflow Sharing (Team tier only) -->
+            <TabItem x:Name="WorkflowSharingTab" Header="{DynamicResource Settings_Tab_WorkflowShare}">
+                <StackPanel Margin="12">
+                    <TextBlock Text="{DynamicResource Settings_WorkflowShare_Header}" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                    <TextBlock Text="{DynamicResource Settings_WorkflowShare_Description}"
+                               Foreground="#757575" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                    <TextBlock Text="{DynamicResource Settings_WorkflowShare_CurrentLabel}" Margin="0,0,0,4"/>
+                    <TextBox x:Name="SharedWorkflowDirText" IsReadOnly="True"
+                             TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="BrowseSharedWorkflowDirButton"
+                                Content="{DynamicResource Settings_WorkflowShare_Browse}"
+                                Padding="14,6"
+                                Click="BrowseSharedWorkflowDirButton_Click"/>
+                        <Button x:Name="ClearSharedWorkflowDirButton"
+                                Content="{DynamicResource Settings_WorkflowShare_Clear}"
+                                Padding="14,6" Margin="6,0,0,0"
+                                Click="ClearSharedWorkflowDirButton_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+
             <!-- Language -->
             <TabItem Header="{DynamicResource Settings_Language}">
                 <StackPanel Margin="12">
