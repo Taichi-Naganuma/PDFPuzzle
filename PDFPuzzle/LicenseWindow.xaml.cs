@@ -17,19 +17,35 @@ namespace PDFPuzzle
         private void RefreshTierDisplay()
         {
             var tier = LicenseService.GetCurrentTier();
-            CurrentTierText.Text = LocalizationService.Get(tier == LicenseTier.Business
-                ? "Tier_Business" : "Tier_Personal");
+            CurrentTierText.Text = LocalizationService.Get(tier switch
+            {
+                LicenseTier.Team => "Tier_Team",
+                LicenseTier.Business => "Tier_Business",
+                _ => "Tier_Personal",
+            });
 
             // 階層別の機能リスト + CTA ボタンの出し分け。
             // Personal / Business の表示制御は従来どおり（Team 分岐の追加のみ）。
             bool isBusiness = tier == LicenseTier.Business;
+            bool isTeam = tier == LicenseTier.Team;
             PersonalFeaturesPanel.Visibility = isBusiness ? Visibility.Collapsed : Visibility.Visible;
             BusinessFeaturesPanel.Visibility = isBusiness ? Visibility.Visible : Visibility.Collapsed;
             UpgradeCtaButton.Visibility = isBusiness ? Visibility.Collapsed : Visibility.Visible;
 
+            // Team のときは Team 専用パネルのみを表示し、Personal / Business パネルは隠す。
+            if (isTeam)
+            {
+                PersonalFeaturesPanel.Visibility = Visibility.Collapsed;
+                BusinessFeaturesPanel.Visibility = Visibility.Collapsed;
+                TeamFeaturesPanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                TeamFeaturesPanel.Visibility = Visibility.Collapsed;
+            }
+
             // Row 5 は UpgradeCtaButton と ManageSeatsButton を共有する（同時表示はしない）。
             // Personal → UpgradeCta 表示 / Team → ManageSeats 表示 / Business → どちらも非表示。
-            bool isTeam = tier == LicenseTier.Team;
             ManageSeatsButton.Visibility = isTeam ? Visibility.Visible : Visibility.Collapsed;
             if (isTeam)
             {

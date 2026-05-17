@@ -83,6 +83,26 @@
             </TextBlock>
         </StackPanel>
 
+        <!-- 機能リスト（チーム版） -->
+        <StackPanel x:Name="TeamFeaturesPanel" Grid.Row="4" Margin="8,0,0,8" Visibility="Collapsed">
+            <TextBlock FontSize="12" Foreground="#424242" Margin="0,0,0,2">
+                <Run Text="&#x2022;  "/>
+                <Run Text="{DynamicResource License_Features_Team_1}"/>
+            </TextBlock>
+            <TextBlock FontSize="12" Foreground="#424242" Margin="0,0,0,2">
+                <Run Text="&#x2022;  "/>
+                <Run Text="{DynamicResource License_Features_Team_2}"/>
+            </TextBlock>
+            <TextBlock FontSize="12" Foreground="#424242" Margin="0,0,0,2">
+                <Run Text="&#x2022;  "/>
+                <Run Text="{DynamicResource License_Features_Team_3}"/>
+            </TextBlock>
+            <TextBlock FontSize="12" Foreground="#424242" Margin="0,0,0,2">
+                <Run Text="&#x2022;  "/>
+                <Run Text="{DynamicResource License_Features_Team_4}"/>
+            </TextBlock>
+        </StackPanel>
+
         <!-- CTA: 事業者版へアップグレード（個人版のみ表示） -->
         <Button x:Name="UpgradeCtaButton" Grid.Row="5"
                 Content="{DynamicResource License_Upgrade_Cta}"

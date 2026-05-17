@@ -70,6 +70,7 @@
 
     <sys:String x:Key="Tier_Personal">Personal Edition</sys:String>
     <sys:String x:Key="Tier_Business">Business Edition</sys:String>
+    <sys:String x:Key="Tier_Team">Team Edition</sys:String>
 
     <sys:String x:Key="Msg_NeedFileAndAction">Please specify both files and a process to run.</sys:String>
     <sys:String x:Key="Msg_NeedMoreFiles">Merging PDFs requires 2 or more files.</sys:String>
@@ -122,6 +123,10 @@
     <sys:String x:Key="License_Features_Business_2">Process log export (JSON / CSV)</sys:String>
     <sys:String x:Key="License_Features_Business_3">Commercial-use license</sys:String>
     <sys:String x:Key="License_Features_Business_4">Install on multiple PCs</sys:String>
+    <sys:String x:Key="License_Features_Team_1">No limit on file count or saved workflows</sys:String>
+    <sys:String x:Key="License_Features_Team_2">Use multiple devices (seats) per license, with a seat management screen</sys:String>
+    <sys:String x:Key="License_Features_Team_3">Audit log (who ran what, when) with CSV export</sys:String>
+    <sys:String x:Key="License_Features_Team_4">Share workflows with your team via a shared folder</sys:String>
     <sys:String x:Key="License_Upgrade_Cta">Upgrade to Business Edition →</sys:String>
     <sys:String x:Key="License_ManageSeats">Manage Seats →</sys:String>
 

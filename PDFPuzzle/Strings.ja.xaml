@@ -70,6 +70,7 @@
 
     <sys:String x:Key="Tier_Personal">個人版</sys:String>
     <sys:String x:Key="Tier_Business">事業者版</sys:String>
+    <sys:String x:Key="Tier_Team">チーム版</sys:String>
 
     <sys:String x:Key="Msg_NeedFileAndAction">ファイルと実行内容を両方指定してください。</sys:String>
     <sys:String x:Key="Msg_NeedMoreFiles">PDFの結合には2つ以上のファイルが必要です。</sys:String>
@@ -122,6 +123,10 @@
     <sys:String x:Key="License_Features_Business_2">処理ログ機能（JSON / CSV 出力）</sys:String>
     <sys:String x:Key="License_Features_Business_3">商用利用ライセンス</sys:String>
     <sys:String x:Key="License_Features_Business_4">複数 PC でのインストール可</sys:String>
+    <sys:String x:Key="License_Features_Team_1">処理ファイル数・ワークフロー保存数の上限なし</sys:String>
+    <sys:String x:Key="License_Features_Team_2">1ライセンスで複数端末（席）を利用・席数管理画面つき</sys:String>
+    <sys:String x:Key="License_Features_Team_3">監査ログ（実行者・日時の記録）と CSV 出力</sys:String>
+    <sys:String x:Key="License_Features_Team_4">ワークフローを共有フォルダでチーム共有</sys:String>
     <sys:String x:Key="License_Upgrade_Cta">事業者版へアップグレード →</sys:String>
     <sys:String x:Key="License_ManageSeats">席数を管理 →</sys:String>
 
