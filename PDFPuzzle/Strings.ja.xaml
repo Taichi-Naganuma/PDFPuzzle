@@ -58,6 +58,7 @@
     <sys:String x:Key="License_ErrorEmpty">ライセンスキーを入力してください。</sys:String>
     <sys:String x:Key="License_ErrorInvalid">無効なライセンスキーです。</sys:String>
     <sys:String x:Key="License_ErrorNetwork">ネットワークエラー。インターネット接続を確認してください。</sys:String>
+    <sys:String x:Key="License_ErrorSeatsExceeded">この製品ライセンスの利用席数が上限に達しています。既存の端末で「ライセンス解除」を行うか、席数を追加購入してください。</sys:String>
     <sys:String x:Key="License_CurrentTier_Prefix">現在のライセンス階層: </sys:String>
 
     <sys:String x:Key="Tier_Personal">個人版</sys:String>

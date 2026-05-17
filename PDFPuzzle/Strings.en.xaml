@@ -58,6 +58,7 @@
     <sys:String x:Key="License_ErrorEmpty">Please enter a license key.</sys:String>
     <sys:String x:Key="License_ErrorInvalid">Invalid license key.</sys:String>
     <sys:String x:Key="License_ErrorNetwork">Network error. Please check your internet connection.</sys:String>
+    <sys:String x:Key="License_ErrorSeatsExceeded">All seats for this license are in use. Deactivate the license on another device, or purchase additional seats.</sys:String>
     <sys:String x:Key="License_CurrentTier_Prefix">Current license tier: </sys:String>
 
     <sys:String x:Key="Tier_Personal">Personal Edition</sys:String>

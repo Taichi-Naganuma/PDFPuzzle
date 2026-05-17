@@ -164,8 +164,16 @@ namespace PDFPuzzle.Tests
     }
 
     // ---------------------------------------------------------------
+    // ActivationStore.OverrideBaseDir は static のため、これを書き換える
+    // テストクラス同士は並列実行させない（クラス間レースの防止）。
+    // ---------------------------------------------------------------
+    [CollectionDefinition("ActivationStoreSerial", DisableParallelization = true)]
+    public class ActivationStoreSerialCollection { }
+
+    // ---------------------------------------------------------------
     // 1-D. ActivationStore — M5 受け入れ条件の核心
     // ---------------------------------------------------------------
+    [Collection("ActivationStoreSerial")]
     public class ActivationStoreTest : IDisposable
     {
         private readonly string _tempDir;
@@ -318,6 +326,142 @@ namespace PDFPuzzle.Tests
             var store = ActivationStore.Load("NON-EXISTENT-KEY", seatCount: 3);
             Assert.Equal(0, store.UsedSeats);
             Assert.Equal(3, store.SeatCount);
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // 2-A. TeamSeatService — 席消費オーケストレーション（第2次）
+    //   M5 受け入れ条件「3端末OK / 4端末NG」をサービス層で再現する。
+    // ---------------------------------------------------------------
+    [Collection("ActivationStoreSerial")]
+    public class TeamSeatServiceTest : IDisposable
+    {
+        private readonly string _tempDir;
+
+        public TeamSeatServiceTest()
+        {
+            _tempDir = Path.Combine(Path.GetTempPath(), "PDFPuzzleTest_" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(_tempDir);
+            ActivationStore.OverrideBaseDir = _tempDir;
+        }
+
+        public void Dispose()
+        {
+            ActivationStore.OverrideBaseDir = null;
+            try { Directory.Delete(_tempDir, recursive: true); } catch { }
+        }
+
+        private const string TeamKey = "TEAM-LICENSE-KEY-0002";
+
+        // --- 非 Team tier: 席を消費せず常に true、ファイルも作らない ---
+
+        [Theory]
+        [InlineData("Personal")]
+        [InlineData("Business")]
+        public void TryConsumeSeat_NonTeamTier_ReturnsTrue_NoStoreFile(string tierName)
+        {
+            var tier = Enum.Parse<LicenseTier>(tierName);
+            bool ok = TeamSeatService.TryConsumeSeat(
+                "PERSONAL-OR-BIZ-KEY", tier, seatCount: 1,
+                "dev-x", "PC-X", "user-x");
+
+            Assert.True(ok);
+            // 非 Team は ActivationStore に一切触れないこと（ファイル未生成で担保）。
+            Assert.Empty(Directory.GetFiles(_tempDir, "*.json"));
+        }
+
+        // --- M5 核心: Team・空 store に3端末OK / 4端末目NG ---
+
+        [Fact]
+        public void TryConsumeSeat_Team_ThreeDevicesOk_FourthRejected()
+        {
+            Assert.True(TeamSeatService.TryConsumeSeat(
+                TeamKey, LicenseTier.Team, seatCount: 3, "dev-1", "PC-A", "alice"));
+            Assert.True(TeamSeatService.TryConsumeSeat(
+                TeamKey, LicenseTier.Team, seatCount: 3, "dev-2", "PC-B", "bob"));
+            Assert.True(TeamSeatService.TryConsumeSeat(
+                TeamKey, LicenseTier.Team, seatCount: 3, "dev-3", "PC-C", "carol"));
+
+            // 4端末目は満席で拒否。
+            Assert.False(TeamSeatService.TryConsumeSeat(
+                TeamKey, LicenseTier.Team, seatCount: 3, "dev-4", "PC-D", "dave"));
+
+            // store にも 3 席しか乗っていないこと。
+            var store = ActivationStore.Load(TeamKey, seatCount: 3);
+            Assert.Equal(3, store.UsedSeats);
+            Assert.False(store.ContainsDevice("dev-4"));
+        }
+
+        // --- 既存端末の再 TryConsumeSeat: 席数不変で true ---
+
+        [Fact]
+        public void TryConsumeSeat_ExistingDevice_ReturnsTrue_SeatsUnchanged()
+        {
+            TeamSeatService.TryConsumeSeat(TeamKey, LicenseTier.Team, 3, "dev-1", "PC-A", "alice");
+            TeamSeatService.TryConsumeSeat(TeamKey, LicenseTier.Team, 3, "dev-2", "PC-B", "bob");
+            TeamSeatService.TryConsumeSeat(TeamKey, LicenseTier.Team, 3, "dev-3", "PC-C", "carol");
+
+            // 満席だが既存端末 dev-2 の再認証は許可される。
+            Assert.True(TeamSeatService.TryConsumeSeat(
+                TeamKey, LicenseTier.Team, 3, "dev-2", "PC-B", "bob"));
+
+            var store = ActivationStore.Load(TeamKey, seatCount: 3);
+            Assert.Equal(3, store.UsedSeats);
+        }
+
+        // --- ReleaseSeat 後に空き席が戻り再消費可能 ---
+
+        [Fact]
+        public void ReleaseSeat_Team_FreesSeat_AllowsReConsume()
+        {
+            TeamSeatService.TryConsumeSeat(TeamKey, LicenseTier.Team, 3, "dev-1", "PC-A", "alice");
+            TeamSeatService.TryConsumeSeat(TeamKey, LicenseTier.Team, 3, "dev-2", "PC-B", "bob");
+            TeamSeatService.TryConsumeSeat(TeamKey, LicenseTier.Team, 3, "dev-3", "PC-C", "carol");
+            Assert.False(TeamSeatService.TryConsumeSeat(
+                TeamKey, LicenseTier.Team, 3, "dev-4", "PC-D", "dave"));
+
+            // dev-2 の席を返却。
+            TeamSeatService.ReleaseSeat(TeamKey, LicenseTier.Team, "dev-2");
+
+            var afterRelease = ActivationStore.Load(TeamKey, seatCount: 3);
+            Assert.Equal(2, afterRelease.UsedSeats);
+            Assert.False(afterRelease.ContainsDevice("dev-2"));
+
+            // 空き席に dev-4 を再消費できる。
+            Assert.True(TeamSeatService.TryConsumeSeat(
+                TeamKey, LicenseTier.Team, 3, "dev-4", "PC-D", "dave"));
+            Assert.Equal(3, ActivationStore.Load(TeamKey, seatCount: 3).UsedSeats);
+        }
+
+        [Fact]
+        public void ReleaseSeat_NonTeamTier_IsNoOp()
+        {
+            // 非 Team は store に触れない（ファイル未生成で担保。例外も投げない）。
+            TeamSeatService.ReleaseSeat("PERSONAL-KEY", LicenseTier.Personal, "dev-x");
+            TeamSeatService.ReleaseSeat("BIZ-KEY", LicenseTier.Business, "dev-y");
+            Assert.Empty(Directory.GetFiles(_tempDir, "*.json"));
+        }
+
+        // --- TryConsumeSeat 成功後にファイル保存・ラウンドトリップ一致 ---
+
+        [Fact]
+        public void TryConsumeSeat_Team_PersistsStore_RoundTrips()
+        {
+            Assert.True(TeamSeatService.TryConsumeSeat(
+                TeamKey, LicenseTier.Team, 3, "dev-1", "PC-A", "alice"));
+
+            // Save 済みでファイルが存在すること。
+            var files = Directory.GetFiles(_tempDir, "*.json");
+            Assert.Single(files);
+
+            // 別 Load でラウンドトリップ一致。
+            var reloaded = ActivationStore.Load(TeamKey, seatCount: 3);
+            Assert.Equal(1, reloaded.UsedSeats);
+            Assert.Equal(LicenseTier.Team, reloaded.Tier);
+            Assert.True(reloaded.ContainsDevice("dev-1"));
+            var dev1 = reloaded.Devices.First(d => d.DeviceId == "dev-1");
+            Assert.Equal("PC-A", dev1.MachineName);
+            Assert.Equal("alice", dev1.UserName);
         }
     }
 }
