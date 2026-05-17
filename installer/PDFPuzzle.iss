@@ -1,4 +1,5 @@
 #define AppName "PDFPuzzle"
+; AppVersion は PDFPuzzle/PDFPuzzle.csproj <Version> と同期管理（v1.0.1 切替時は両方更新）
 #define AppVersion "1.0.0"
 #define AppPublisher "desk-fire"
 #define AppURL "https://bookworm807.gumroad.com"

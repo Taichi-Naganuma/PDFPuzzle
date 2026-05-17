@@ -4,7 +4,6 @@
         mc:Ignorable="d"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        Title="{DynamicResource AppTitle}"
         Height="540" Width="880" MinHeight="460" MinWidth="720"
         Background="#F5F5F5"
         PreviewMouseUp="Window_PreviewMouseUp"
@@ -213,6 +212,12 @@
                     Width="130" Height="36" Click="Exe_Button_Click"
                     Background="#D32F2F" Foreground="White"
                     FontWeight="Bold" FontSize="13" BorderThickness="0"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="8,0,0,0">
+                <Button Content="{DynamicResource Btn_SaveWorkflow}"
+                        MinWidth="72" Height="36" Click="SaveWorkflow_Click"/>
+                <Button Content="{DynamicResource Btn_LoadWorkflow}"
+                        MinWidth="72" Height="36" Click="LoadWorkflow_Click" Margin="4,0,0,0"/>
+            </StackPanel>
             <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="8,0,0,0">
                 <Button Content="{DynamicResource Btn_Settings}"
                         MinWidth="55" Height="36" Click="Settings_Button_Click"/>

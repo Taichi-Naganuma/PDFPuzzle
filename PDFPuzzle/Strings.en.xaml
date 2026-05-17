@@ -27,6 +27,7 @@
 
     <sys:String x:Key="Status_Processing">Processing...</sys:String>
     <sys:String x:Key="Status_Done">Done</sys:String>
+    <sys:String x:Key="Status_Error">An error occurred</sys:String>
 
     <sys:String x:Key="Settings_Title">Settings</sys:String>
     <sys:String x:Key="Settings_Tab_Split">Split</sys:String>
@@ -40,6 +41,13 @@
     <sys:String x:Key="Settings_Extract_PageRangeNote">Example: 1,3,5-8 (comma-separated, hyphen for ranges)</sys:String>
     <sys:String x:Key="Settings_Output_Options">Output Options</sys:String>
     <sys:String x:Key="Settings_Output_OpenFolder">Open output folder automatically after processing</sys:String>
+    <sys:String x:Key="Settings_Tab_WorkflowShare">Workflow Sharing</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_Header">Shared Workflow Folder</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_Description">Specify a shared folder (e.g. an office file server) to share saved workflows across multiple devices. If not set, workflows are stored only on this device.</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_CurrentLabel">Current shared folder:</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_None">Not shared (this device only)</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_Browse">Browse...</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_Clear">Stop sharing</sys:String>
     <sys:String x:Key="Btn_OK">OK</sys:String>
 
     <sys:String x:Key="Method_Merge">Merge PDFs</sys:String>
@@ -57,10 +65,89 @@
     <sys:String x:Key="License_ErrorEmpty">Please enter a license key.</sys:String>
     <sys:String x:Key="License_ErrorInvalid">Invalid license key.</sys:String>
     <sys:String x:Key="License_ErrorNetwork">Network error. Please check your internet connection.</sys:String>
+    <sys:String x:Key="License_ErrorSeatsExceeded">All seats for this license are in use. Deactivate the license on another device, or purchase additional seats.</sys:String>
+    <sys:String x:Key="License_CurrentTier_Prefix">Current license tier: </sys:String>
+
+    <sys:String x:Key="Tier_Personal">Personal Edition</sys:String>
+    <sys:String x:Key="Tier_Business">Business Edition</sys:String>
+    <sys:String x:Key="Tier_Team">Team Edition</sys:String>
 
     <sys:String x:Key="Msg_NeedFileAndAction">Please specify both files and a process to run.</sys:String>
     <sys:String x:Key="Msg_NeedMoreFiles">Merging PDFs requires 2 or more files.</sys:String>
     <sys:String x:Key="Msg_NoPageRange">No page range set. Please configure in Settings.</sys:String>
     <sys:String x:Key="Msg_SelectMethod">Please select a method from the menu first.</sys:String>
+
+    <sys:String x:Key="Btn_SaveWorkflow">💾 Save</sys:String>
+    <sys:String x:Key="Btn_LoadWorkflow">📂 Load</sys:String>
+    <sys:String x:Key="Workflow_Save_Title">Save Workflow</sys:String>
+    <sys:String x:Key="Workflow_Load_Title">Load Workflow</sys:String>
+    <sys:String x:Key="Workflow_NameLabel">Workflow Name</sys:String>
+    <sys:String x:Key="Workflow_Save_OK">Save</sys:String>
+    <sys:String x:Key="Workflow_Load_OK">Load</sys:String>
+    <sys:String x:Key="Workflow_Cancel">Cancel</sys:String>
+    <sys:String x:Key="Workflow_Delete">Delete</sys:String>
+    <sys:String x:Key="Workflow_ErrorEmpty">Please enter a workflow name.</sys:String>
+    <sys:String x:Key="Workflow_ConfirmOverwrite">A workflow with this name already exists. Overwrite?</sys:String>
+    <sys:String x:Key="Workflow_ConfirmDelete">Delete "{0}"?</sys:String>
+    <sys:String x:Key="Workflow_Load_Empty">No saved workflows.</sys:String>
+    <sys:String x:Key="Workflow_Load_NoSelection">Please select a workflow.</sys:String>
+    <sys:String x:Key="Workflow_Save_NoSteps">The pipeline is empty.</sys:String>
+    <sys:String x:Key="Workflow_Load_Failed">Could not load workflow. It contains methods that no longer exist.</sys:String>
+    <sys:String x:Key="Status_WorkflowSaved">Workflow saved</sys:String>
+    <sys:String x:Key="Status_WorkflowLoaded">Workflow loaded</sys:String>
+
+    <sys:String x:Key="Settings_Logs_Header">Process Logs</sys:String>
+    <sys:String x:Key="Settings_Logs_Description">Execution history is saved as daily JSON files. Useful for audit trails or reporting to clients.</sys:String>
+    <sys:String x:Key="Btn_OpenLogFolder">Open Log Folder</sys:String>
+    <sys:String x:Key="Btn_ExportLogCsv">Export as CSV</sys:String>
+    <sys:String x:Key="Msg_CsvExportDone">Exported {0} log entries.&#x0a;{1}</sys:String>
+
+    <!-- Upgrade dialog (file limit exceeded) -->
+    <sys:String x:Key="LimitDialog_Title">PDFPuzzle - Personal Edition</sys:String>
+    <sys:String x:Key="LimitDialog_Header">The Personal Edition supports up to 30 PDF files per batch</sys:String>
+    <sys:String x:Key="LimitDialog_Body">To process the 31st file and beyond, please upgrade to the Business Edition.</sys:String>
+    <sys:String x:Key="LimitDialog_FeaturesHeading">Business Edition features:</sys:String>
+    <sys:String x:Key="LimitDialog_Feature1">Unlimited files per batch</sys:String>
+    <sys:String x:Key="LimitDialog_Feature2">Process log export (JSON / CSV)</sys:String>
+    <sys:String x:Key="LimitDialog_Feature3">Commercial-use license</sys:String>
+    <sys:String x:Key="LimitDialog_Feature4">Install on multiple PCs</sys:String>
+    <sys:String x:Key="LimitDialog_OpenStore">View Business Edition</sys:String>
+    <sys:String x:Key="LimitDialog_Close">Close</sys:String>
+
+    <!-- LicenseWindow feature list -->
+    <sys:String x:Key="License_Features_Heading">Available features:</sys:String>
+    <sys:String x:Key="License_Features_Personal_1">Up to 30 files per batch</sys:String>
+    <sys:String x:Key="License_Features_Personal_2">3 core operations (Merge / Split / Extract)</sys:String>
+    <sys:String x:Key="License_Features_Personal_3">Workflow v1</sys:String>
+    <sys:String x:Key="License_Features_Business_1">Unlimited files per batch</sys:String>
+    <sys:String x:Key="License_Features_Business_2">Process log export (JSON / CSV)</sys:String>
+    <sys:String x:Key="License_Features_Business_3">Commercial-use license</sys:String>
+    <sys:String x:Key="License_Features_Business_4">Install on multiple PCs</sys:String>
+    <sys:String x:Key="License_Features_Team_1">No limit on file count or saved workflows</sys:String>
+    <sys:String x:Key="License_Features_Team_2">Use multiple devices (seats) per license, with a seat management screen</sys:String>
+    <sys:String x:Key="License_Features_Team_3">Audit log (who ran what, when) with CSV export</sys:String>
+    <sys:String x:Key="License_Features_Team_4">Share workflows with your team via a shared folder</sys:String>
+    <sys:String x:Key="License_Upgrade_Cta">Upgrade to Business Edition →</sys:String>
+    <sys:String x:Key="License_ManageSeats">Manage Seats →</sys:String>
+
+    <!-- Seat management window (Team Edition v0.2) -->
+    <sys:String x:Key="Seat_Title">Seat Management</sys:String>
+    <sys:String x:Key="Seat_KeyLabel">License key: </sys:String>
+    <sys:String x:Key="Seat_CountLabel">Seats: </sys:String>
+    <sys:String x:Key="Seat_CountSuffix"> in use</sys:String>
+    <sys:String x:Key="Seat_DevicesHeading">Registered devices</sys:String>
+    <sys:String x:Key="Seat_DevicesEmpty">No registered devices.</sys:String>
+    <sys:String x:Key="Seat_Col_Machine">Machine</sys:String>
+    <sys:String x:Key="Seat_Col_User">User</sys:String>
+    <sys:String x:Key="Seat_Col_LastUsed">Last used</sys:String>
+    <sys:String x:Key="Seat_Release">Release</sys:String>
+    <sys:String x:Key="Seat_Release_Confirm">Release the seat for this device?&#x0a;The freed seat can then be used on another device.</sys:String>
+    <sys:String x:Key="Seat_Release_Done">Seat released.</sys:String>
+    <sys:String x:Key="Seat_Release_Failed">Could not release the seat.</sys:String>
+    <sys:String x:Key="Seat_ExportCsv">Export Audit Log to CSV</sys:String>
+    <sys:String x:Key="Seat_ExportCsv_Done">Exported {0} log entries.&#x0a;{1}</sys:String>
+    <sys:String x:Key="Seat_ExportCsv_Failed">Failed to export the audit log.</sys:String>
+    <sys:String x:Key="Seat_Close">Close</sys:String>
+    <sys:String x:Key="Seat_AdminBadge">Admin</sys:String>
 
 </ResourceDictionary>

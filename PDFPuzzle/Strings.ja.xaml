@@ -27,6 +27,7 @@
 
     <sys:String x:Key="Status_Processing">処理中...</sys:String>
     <sys:String x:Key="Status_Done">完了</sys:String>
+    <sys:String x:Key="Status_Error">エラーが発生しました</sys:String>
 
     <sys:String x:Key="Settings_Title">設定</sys:String>
     <sys:String x:Key="Settings_Tab_Split">分割</sys:String>
@@ -40,6 +41,13 @@
     <sys:String x:Key="Settings_Extract_PageRangeNote">例: 1,3,5-8（カンマ区切り・ハイフンで範囲指定）</sys:String>
     <sys:String x:Key="Settings_Output_Options">出力オプション</sys:String>
     <sys:String x:Key="Settings_Output_OpenFolder">処理完了後、出力フォルダを自動で開く</sys:String>
+    <sys:String x:Key="Settings_Tab_WorkflowShare">ワークフロー共有</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_Header">共有ワークフローフォルダ</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_Description">共有フォルダ（社内ファイルサーバー等）を指定すると、保存したワークフローを複数の端末で共有できます。指定しない場合、ワークフローはこの端末内にのみ保存されます。</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_CurrentLabel">現在の共有フォルダ:</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_None">共有しない（この端末のみ）</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_Browse">参照...</sys:String>
+    <sys:String x:Key="Settings_WorkflowShare_Clear">共有を解除</sys:String>
     <sys:String x:Key="Btn_OK">OK</sys:String>
 
     <sys:String x:Key="Method_Merge">PDFを結合</sys:String>
@@ -57,10 +65,89 @@
     <sys:String x:Key="License_ErrorEmpty">ライセンスキーを入力してください。</sys:String>
     <sys:String x:Key="License_ErrorInvalid">無効なライセンスキーです。</sys:String>
     <sys:String x:Key="License_ErrorNetwork">ネットワークエラー。インターネット接続を確認してください。</sys:String>
+    <sys:String x:Key="License_ErrorSeatsExceeded">この製品ライセンスの利用席数が上限に達しています。既存の端末で「ライセンス解除」を行うか、席数を追加購入してください。</sys:String>
+    <sys:String x:Key="License_CurrentTier_Prefix">現在のライセンス階層: </sys:String>
+
+    <sys:String x:Key="Tier_Personal">個人版</sys:String>
+    <sys:String x:Key="Tier_Business">事業者版</sys:String>
+    <sys:String x:Key="Tier_Team">チーム版</sys:String>
 
     <sys:String x:Key="Msg_NeedFileAndAction">ファイルと実行内容を両方指定してください。</sys:String>
     <sys:String x:Key="Msg_NeedMoreFiles">PDFの結合には2つ以上のファイルが必要です。</sys:String>
     <sys:String x:Key="Msg_NoPageRange">抽出するページ番号が設定されていません。設定画面から設定してください。</sys:String>
     <sys:String x:Key="Msg_SelectMethod">処理メニューから追加したい処理を選択してください。</sys:String>
+
+    <sys:String x:Key="Btn_SaveWorkflow">💾 保存</sys:String>
+    <sys:String x:Key="Btn_LoadWorkflow">📂 読込</sys:String>
+    <sys:String x:Key="Workflow_Save_Title">ワークフローを保存</sys:String>
+    <sys:String x:Key="Workflow_Load_Title">ワークフローを読込</sys:String>
+    <sys:String x:Key="Workflow_NameLabel">ワークフロー名</sys:String>
+    <sys:String x:Key="Workflow_Save_OK">保存</sys:String>
+    <sys:String x:Key="Workflow_Load_OK">読込</sys:String>
+    <sys:String x:Key="Workflow_Cancel">キャンセル</sys:String>
+    <sys:String x:Key="Workflow_Delete">削除</sys:String>
+    <sys:String x:Key="Workflow_ErrorEmpty">ワークフロー名を入力してください。</sys:String>
+    <sys:String x:Key="Workflow_ConfirmOverwrite">同名のワークフローが既に存在します。上書きしますか？</sys:String>
+    <sys:String x:Key="Workflow_ConfirmDelete">「{0}」を削除します。よろしいですか？</sys:String>
+    <sys:String x:Key="Workflow_Load_Empty">保存済みのワークフローはありません。</sys:String>
+    <sys:String x:Key="Workflow_Load_NoSelection">ワークフローを選択してください。</sys:String>
+    <sys:String x:Key="Workflow_Save_NoSteps">パイプラインに処理が登録されていません。</sys:String>
+    <sys:String x:Key="Workflow_Load_Failed">ワークフローを読込めませんでした。処理メニューに存在しない項目が含まれています。</sys:String>
+    <sys:String x:Key="Status_WorkflowSaved">ワークフローを保存しました</sys:String>
+    <sys:String x:Key="Status_WorkflowLoaded">ワークフローを読込みました</sys:String>
+
+    <sys:String x:Key="Settings_Logs_Header">処理ログ</sys:String>
+    <sys:String x:Key="Settings_Logs_Description">実行履歴は日次のJSONファイルとして保存されます。監査・取引先への報告用にご利用ください。</sys:String>
+    <sys:String x:Key="Btn_OpenLogFolder">ログフォルダを開く</sys:String>
+    <sys:String x:Key="Btn_ExportLogCsv">CSVでエクスポート</sys:String>
+    <sys:String x:Key="Msg_CsvExportDone">{0}件のログを書き出しました。&#x0a;{1}</sys:String>
+
+    <!-- アップグレード誘導ダイアログ（30ファイル超過時） -->
+    <sys:String x:Key="LimitDialog_Title">PDFPuzzle - 個人版</sys:String>
+    <sys:String x:Key="LimitDialog_Header">個人版では一度に処理できる PDF は 30 ファイルまでです</sys:String>
+    <sys:String x:Key="LimitDialog_Body">31 ファイル目以降を処理するには、事業者版へのアップグレードが必要です。</sys:String>
+    <sys:String x:Key="LimitDialog_FeaturesHeading">事業者版の特長:</sys:String>
+    <sys:String x:Key="LimitDialog_Feature1">一度に処理できるファイル数 無制限</sys:String>
+    <sys:String x:Key="LimitDialog_Feature2">処理ログ機能（JSON / CSV 出力）</sys:String>
+    <sys:String x:Key="LimitDialog_Feature3">商用利用ライセンス</sys:String>
+    <sys:String x:Key="LimitDialog_Feature4">複数 PC でのインストール可</sys:String>
+    <sys:String x:Key="LimitDialog_OpenStore">事業者版を見る</sys:String>
+    <sys:String x:Key="LimitDialog_Close">閉じる</sys:String>
+
+    <!-- LicenseWindow 機能リスト -->
+    <sys:String x:Key="License_Features_Heading">ご利用いただける機能:</sys:String>
+    <sys:String x:Key="License_Features_Personal_1">一度に処理できるファイル数 30 まで</sys:String>
+    <sys:String x:Key="License_Features_Personal_2">既存 3 処理（結合・分割・抽出）</sys:String>
+    <sys:String x:Key="License_Features_Personal_3">ワークフロー機能v1</sys:String>
+    <sys:String x:Key="License_Features_Business_1">一度に処理できるファイル数 無制限</sys:String>
+    <sys:String x:Key="License_Features_Business_2">処理ログ機能（JSON / CSV 出力）</sys:String>
+    <sys:String x:Key="License_Features_Business_3">商用利用ライセンス</sys:String>
+    <sys:String x:Key="License_Features_Business_4">複数 PC でのインストール可</sys:String>
+    <sys:String x:Key="License_Features_Team_1">処理ファイル数・ワークフロー保存数の上限なし</sys:String>
+    <sys:String x:Key="License_Features_Team_2">1ライセンスで複数端末（席）を利用・席数管理画面つき</sys:String>
+    <sys:String x:Key="License_Features_Team_3">監査ログ（実行者・日時の記録）と CSV 出力</sys:String>
+    <sys:String x:Key="License_Features_Team_4">ワークフローを共有フォルダでチーム共有</sys:String>
+    <sys:String x:Key="License_Upgrade_Cta">事業者版へアップグレード →</sys:String>
+    <sys:String x:Key="License_ManageSeats">席数を管理 →</sys:String>
+
+    <!-- 席数管理ウィンドウ（チーム版 v0.2） -->
+    <sys:String x:Key="Seat_Title">席数の管理</sys:String>
+    <sys:String x:Key="Seat_KeyLabel">ライセンスキー: </sys:String>
+    <sys:String x:Key="Seat_CountLabel">席数: </sys:String>
+    <sys:String x:Key="Seat_CountSuffix"> 使用中</sys:String>
+    <sys:String x:Key="Seat_DevicesHeading">登録済みの端末</sys:String>
+    <sys:String x:Key="Seat_DevicesEmpty">登録済みの端末はありません。</sys:String>
+    <sys:String x:Key="Seat_Col_Machine">端末名</sys:String>
+    <sys:String x:Key="Seat_Col_User">ユーザー名</sys:String>
+    <sys:String x:Key="Seat_Col_LastUsed">最終利用日時</sys:String>
+    <sys:String x:Key="Seat_Release">席を解除</sys:String>
+    <sys:String x:Key="Seat_Release_Confirm">この端末の席を解除します。よろしいですか？&#x0a;解除後、空いた席は別の端末で利用できます。</sys:String>
+    <sys:String x:Key="Seat_Release_Done">席を解除しました。</sys:String>
+    <sys:String x:Key="Seat_Release_Failed">席を解除できませんでした。</sys:String>
+    <sys:String x:Key="Seat_ExportCsv">監査ログをCSV出力</sys:String>
+    <sys:String x:Key="Seat_ExportCsv_Done">{0}件のログを書き出しました。&#x0a;{1}</sys:String>
+    <sys:String x:Key="Seat_ExportCsv_Failed">監査ログの書き出しに失敗しました。</sys:String>
+    <sys:String x:Key="Seat_Close">閉じる</sys:String>
+    <sys:String x:Key="Seat_AdminBadge">管理者</sys:String>
 
 </ResourceDictionary>

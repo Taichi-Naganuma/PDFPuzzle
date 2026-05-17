@@ -27,6 +27,7 @@ namespace PDFPuzzle
             {
                 foreach (var item in MethodItems) item.RefreshDisplayName();
                 foreach (var item in ExeItems) item.RefreshDisplayName();
+                UpdateTitle();
             };
 
             if (_settings.OutputFolderPath != null && Directory.Exists(_settings.OutputFolderPath))
@@ -34,6 +35,17 @@ namespace PDFPuzzle
                 FolderPath = _settings.OutputFolderPath;
                 OutputLabel.Content = Path.GetFileName(FolderPath);
             }
+
+            UpdateTitle();
+        }
+
+        private void UpdateTitle()
+        {
+            var baseTitle = LocalizationService.Get("AppTitle");
+            var tier = LicenseService.GetCurrentTier();
+            var tierLabel = LocalizationService.Get(tier == LicenseTier.Business
+                ? "Tier_Business" : "Tier_Personal");
+            Title = $"{baseTitle} - {tierLabel}";
         }
 
         private readonly Methods _methods;
@@ -236,8 +248,22 @@ namespace PDFPuzzle
             {
                 var paths = (string[])e.Data.GetData(DataFormats.FileDrop);
                 if (paths != null)
-                    foreach (string s in paths.Where(p => p.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)))
+                {
+                    var pdfPaths = paths
+                        .Where(p => p.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                        .ToArray();
+
+                    // 個人版30ファイル上限ガード（事業者版は無制限）
+                    if (ExceedsPersonalLimit(pdfPaths.Length))
+                    {
+                        ShowUpgradeDialog();
+                        fileplace = null;
+                        return;
+                    }
+
+                    foreach (string s in pdfPaths)
                         FileItems.Add(new FileItem { Path = s, DisplayPath = Path.GetFileName(s) });
+                }
                 fileplace = null;
             }
             else if (e.Data.GetDataPresent(typeof(FileItem)))
@@ -288,9 +314,32 @@ namespace PDFPuzzle
         private void Ref_Button_Click(object sender, RoutedEventArgs e)
         {
             string[]? paths = _itemService.SelectFile();
-            if (paths != null)
-                foreach (string p in paths)
-                    FileItems.Add(new FileItem { Path = p, DisplayPath = Path.GetFileName(p) });
+            if (paths == null) return;
+
+            // 個人版30ファイル上限ガード（事業者版は無制限）
+            if (ExceedsPersonalLimit(paths.Length))
+            {
+                ShowUpgradeDialog();
+                return;
+            }
+
+            foreach (string p in paths)
+                FileItems.Add(new FileItem { Path = p, DisplayPath = Path.GetFileName(p) });
+        }
+
+        // 個人版で 既存リスト数 + 追加候補数 > 30 を超える場合 true。
+        // 事業者版は常に false（無制限追加可）。判定は LicenseService.GetCurrentTier() 経由。
+        private const int PersonalFileLimit = 30;
+        private bool ExceedsPersonalLimit(int additionCount)
+        {
+            if (LicenseService.GetCurrentTier() != LicenseTier.Personal) return false;
+            return FileItems.Count + additionCount > PersonalFileLimit;
+        }
+
+        private void ShowUpgradeDialog()
+        {
+            var dlg = new UpgradeDialog { Owner = this };
+            dlg.ShowDialog();
         }
 
         private void SelectFolder_Click(object sender, RoutedEventArgs e)
@@ -328,25 +377,62 @@ namespace PDFPuzzle
 
             var steps = ExeItems.ToList();
             var progress = new Progress<string>(msg => StatusLabel.Content = msg);
+            var logRun = LogService.StartRun(FolderPath);
 
             try
             {
                 for (int i = 0; i < steps.Count; i++)
                 {
                     var item = steps[i];
-                    if (item.ExecuteAsync != null)
+                    if (item.ExecuteAsync == null) continue;
+
+                    var stepStart = DateTime.Now;
+                    var inputs = FileItems.Where(f => f.Path != null).Select(f => f.Path!).ToList();
+                    bool ok = true;
+                    string? error = null;
+                    try
+                    {
                         await item.ExecuteAsync(progress);
+                    }
+                    catch (Exception ex)
+                    {
+                        ok = false;
+                        error = ex.Message;
+                        throw;
+                    }
+                    finally
+                    {
+                        var outputs = FileItems.Where(f => f.Path != null).Select(f => f.Path!).ToList();
+                        LogService.AddStep(logRun, new StepLogEntry
+                        {
+                            MethodKey = item.DisplayNameKey,
+                            MethodName = item.DisplayName,
+                            StartedAt = stepStart,
+                            CompletedAt = DateTime.Now,
+                            InputFiles = inputs,
+                            OutputFiles = outputs,
+                            Success = ok,
+                            ErrorMessage = error
+                        });
+                    }
                 }
+
+                StatusLabel.Content = L("Status_Done");
+                StatusLabel.Foreground = Brushes.DarkGreen;
+                if (_settings.OpenFolderAfterExecution && FolderPath != null)
+                    System.Diagnostics.Process.Start("explorer.exe", FolderPath);
+            }
+            catch (Exception ex)
+            {
+                StatusLabel.Content = L("Status_Error");
+                StatusLabel.Foreground = Brushes.DarkRed;
+                MessageBox.Show(ex.Message, L("Status_Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             finally
             {
+                LogService.EndRun(logRun);
                 Exe_Button.IsEnabled = true;
                 ExecuteProgressBar.Visibility = Visibility.Collapsed;
-                StatusLabel.Content = L("Status_Done");
-                StatusLabel.Foreground = Brushes.DarkGreen;
-
-                if (_settings.OpenFolderAfterExecution && FolderPath != null)
-                    System.Diagnostics.Process.Start("explorer.exe", FolderPath);
             }
         }
 
@@ -354,6 +440,65 @@ namespace PDFPuzzle
         {
             _property.Owner = this;
             _property.Show();
+        }
+
+        private void SaveWorkflow_Click(object sender, RoutedEventArgs e)
+        {
+            if (ExeItems.Count == 0)
+            {
+                MessageBox.Show(L("Workflow_Save_NoSteps"));
+                return;
+            }
+
+            var displayNames = ExeItems
+                .Where(i => !string.IsNullOrEmpty(i.DisplayName))
+                .Select(i => i.DisplayName!)
+                .ToList();
+            var suggested = WorkflowService.GenerateDefaultName(displayNames);
+
+            var dialog = new WorkflowSaveDialog(suggested) { Owner = this };
+            if (dialog.ShowDialog() != true) return;
+
+            var dto = new WorkflowDto
+            {
+                Name = dialog.WorkflowName,
+                CreatedAt = DateTime.Now,
+                StepKeys = ExeItems
+                    .Where(i => !string.IsNullOrEmpty(i.DisplayNameKey))
+                    .Select(i => i.DisplayNameKey!)
+                    .ToList()
+            };
+
+            if (WorkflowService.Save(dto))
+            {
+                StatusLabel.Content = L("Status_WorkflowSaved");
+                StatusLabel.Foreground = Brushes.DarkGreen;
+            }
+        }
+
+        private void LoadWorkflow_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new WorkflowLoadDialog { Owner = this };
+            if (dialog.ShowDialog() != true || dialog.SelectedWorkflow == null) return;
+
+            var newItems = new List<ExeItem>();
+            foreach (var key in dialog.SelectedWorkflow.StepKeys)
+            {
+                var method = MethodItems.FirstOrDefault(m => m.DisplayNameKey == key);
+                if (method == null)
+                {
+                    MessageBox.Show(L("Workflow_Load_Failed"));
+                    return;
+                }
+                var converted = _itemService.ConvertToExeitem(method.Clone());
+                if (converted != null) newItems.Add(converted);
+            }
+
+            ExeItems.Clear();
+            foreach (var item in newItems) ExeItems.Add(item);
+
+            StatusLabel.Content = L("Status_WorkflowLoaded");
+            StatusLabel.Foreground = Brushes.DarkGreen;
         }
 
         private void Exit_Button_Click(object sender, RoutedEventArgs e) => Application.Current.Shutdown();

@@ -1,0 +1,103 @@
+<Window x:Class="PDFPuzzle.UpgradeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{DynamicResource LimitDialog_Title}"
+        Height="420" Width="520"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+    <Grid Margin="28,24,28,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 警告ヘッダー（⚠ + 30ファイル上限の説明） -->
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       Text="&#x26A0;"
+                       FontSize="22"
+                       Foreground="#F9A825"
+                       VerticalAlignment="Top"
+                       Margin="0,0,12,0"/>
+            <TextBlock Grid.Column="1"
+                       Text="{DynamicResource LimitDialog_Header}"
+                       FontSize="14" FontWeight="Bold"
+                       Foreground="#1565C0"
+                       TextWrapping="Wrap"
+                       VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- 区切り線 -->
+        <Border Grid.Row="1" Height="1" Background="#E0E0E0" Margin="0,0,0,12"/>
+
+        <!-- 本文 -->
+        <TextBlock Grid.Row="2"
+                   Text="{DynamicResource LimitDialog_Body}"
+                   TextWrapping="Wrap"
+                   FontSize="12"
+                   Foreground="#424242"
+                   Margin="0,0,0,12"/>
+
+        <!-- 特長見出し -->
+        <TextBlock Grid.Row="3"
+                   Text="{DynamicResource LimitDialog_FeaturesHeading}"
+                   FontSize="12" FontWeight="Bold"
+                   Foreground="#424242"
+                   Margin="0,0,0,8"/>
+
+        <!-- 特長リスト4項目 -->
+        <StackPanel Grid.Row="4" Margin="8,0,0,12">
+            <TextBlock FontSize="12" Foreground="#424242" Margin="0,0,0,4">
+                <Run Text="&#x2022;  "/>
+                <Run Text="{DynamicResource LimitDialog_Feature1}"/>
+            </TextBlock>
+            <TextBlock FontSize="12" Foreground="#424242" Margin="0,0,0,4">
+                <Run Text="&#x2022;  "/>
+                <Run Text="{DynamicResource LimitDialog_Feature2}"/>
+            </TextBlock>
+            <TextBlock FontSize="12" Foreground="#424242" Margin="0,0,0,4">
+                <Run Text="&#x2022;  "/>
+                <Run Text="{DynamicResource LimitDialog_Feature3}"/>
+            </TextBlock>
+            <TextBlock FontSize="12" Foreground="#424242" Margin="0,0,0,4">
+                <Run Text="&#x2022;  "/>
+                <Run Text="{DynamicResource LimitDialog_Feature4}"/>
+            </TextBlock>
+        </StackPanel>
+
+        <!-- 区切り線 -->
+        <Border Grid.Row="5" Height="1" Background="#E0E0E0" VerticalAlignment="Top" Margin="0,0,0,12"/>
+
+        <!-- ボタン行 -->
+        <Grid Grid.Row="6" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button x:Name="OpenStoreButton" Grid.Column="1"
+                    Content="{DynamicResource LimitDialog_OpenStore}"
+                    Width="160" Height="34"
+                    Background="#1565C0" Foreground="White"
+                    FontWeight="Bold" BorderThickness="0"
+                    Click="OpenStoreButton_Click" IsDefault="True"/>
+
+            <Button x:Name="CloseButton" Grid.Column="3"
+                    Content="{DynamicResource LimitDialog_Close}"
+                    Width="100" Height="34"
+                    Click="CloseButton_Click" IsCancel="True"/>
+        </Grid>
+    </Grid>
+</Window>

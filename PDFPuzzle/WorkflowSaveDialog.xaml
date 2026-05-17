@@ -1,0 +1,58 @@
+<Window x:Class="PDFPuzzle.WorkflowSaveDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{DynamicResource Workflow_Save_Title}"
+        Height="220" Width="440"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+    <Grid Margin="24,20,24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="{DynamicResource Workflow_Save_Title}"
+                   FontSize="15" FontWeight="Bold"
+                   Foreground="#1565C0" Margin="0,0,0,12"/>
+
+        <TextBlock Grid.Row="1"
+                   Text="{DynamicResource Workflow_NameLabel}"
+                   FontWeight="SemiBold" Foreground="#424242"
+                   FontSize="12" Margin="0,0,0,6"/>
+
+        <TextBox x:Name="NameBox" Grid.Row="2"
+                 Height="32" FontSize="13"
+                 VerticalContentAlignment="Center" Padding="8,0"
+                 BorderBrush="#BDBDBD" BorderThickness="1"/>
+
+        <TextBlock x:Name="StatusText" Grid.Row="3"
+                   TextWrapping="Wrap" FontSize="11"
+                   Foreground="#D32F2F" Margin="0,8,0,0" VerticalAlignment="Top"/>
+
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="1"
+                    Content="{DynamicResource Workflow_Cancel}"
+                    Width="80" Height="32"
+                    Click="CancelButton_Click"/>
+
+            <Button Grid.Column="3"
+                    Content="{DynamicResource Workflow_Save_OK}"
+                    Width="100" Height="32"
+                    Background="#1565C0" Foreground="White"
+                    FontWeight="Bold" BorderThickness="0"
+                    Click="SaveButton_Click" IsDefault="True"/>
+        </Grid>
+    </Grid>
+</Window>
