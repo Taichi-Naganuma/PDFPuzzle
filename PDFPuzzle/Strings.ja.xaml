@@ -148,5 +148,6 @@
     <sys:String x:Key="Seat_ExportCsv_Done">{0}件のログを書き出しました。&#x0a;{1}</sys:String>
     <sys:String x:Key="Seat_ExportCsv_Failed">監査ログの書き出しに失敗しました。</sys:String>
     <sys:String x:Key="Seat_Close">閉じる</sys:String>
+    <sys:String x:Key="Seat_AdminBadge">管理者</sys:String>
 
 </ResourceDictionary>

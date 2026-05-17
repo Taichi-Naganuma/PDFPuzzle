@@ -23,6 +23,12 @@ namespace PDFPuzzle
             public string MachineName { get; init; } = string.Empty;
             public string UserName { get; init; } = string.Empty;
             public string LastUsedAtDisplay { get; init; } = string.Empty;
+
+            /// <summary>
+            /// この端末が管理者席（最も早くアクティベートした端末）か。
+            /// v0.2 は識別・表示のみ ── true でも権限差は無い（解除も従来どおり可能）。
+            /// </summary>
+            public bool IsAdmin { get; init; }
         }
 
         // 現在表示中のライセンスキー（生キー）。Refresh のたびに store を Load し直す。
@@ -52,6 +58,9 @@ namespace PDFPuzzle
             SeatProgressBar.Maximum = SeatDisplayFormatter.ProgressMaximum(store.UsedSeats, store.SeatCount);
             SeatProgressBar.Value = store.UsedSeats;
 
+            // 管理者席（最も早くアクティベートした端末）の deviceId を一度だけ取得。
+            string? adminId = store.GetAdminDeviceId();
+
             var rows = new List<DeviceRow>();
             foreach (var d in store.Devices)
             {
@@ -61,6 +70,8 @@ namespace PDFPuzzle
                     MachineName = d.MachineName,
                     UserName = d.UserName,
                     LastUsedAtDisplay = d.LastUsedAt.ToString("yyyy/MM/dd HH:mm"),
+                    IsAdmin = adminId != null
+                        && string.Equals(d.DeviceId, adminId, StringComparison.OrdinalIgnoreCase),
                 });
             }
             DeviceListControl.ItemsSource = rows;

@@ -148,5 +148,6 @@
     <sys:String x:Key="Seat_ExportCsv_Done">Exported {0} log entries.&#x0a;{1}</sys:String>
     <sys:String x:Key="Seat_ExportCsv_Failed">Failed to export the audit log.</sys:String>
     <sys:String x:Key="Seat_Close">Close</sys:String>
+    <sys:String x:Key="Seat_AdminBadge">Admin</sys:String>
 
 </ResourceDictionary>

@@ -441,6 +441,96 @@ namespace PDFPuzzle.Tests
             Assert.Equal(3, store3.SeatCount);
             Assert.Equal(5, store3.UsedSeats); // 超過端末はそのまま残る（縮約は範囲外）。
         }
+
+        // --- v0.2 第6次: 管理者席の識別（GetAdminDeviceId） ---
+
+        [Fact]
+        public void GetAdminDeviceId_EmptyStore_ReturnsNull()
+        {
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            Assert.Null(store.GetAdminDeviceId());
+        }
+
+        [Fact]
+        public void GetAdminDeviceId_SingleDevice_ReturnsThatDevice()
+        {
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-1", "PC-A", "alice");
+            Assert.Equal("dev-1", store.GetAdminDeviceId());
+        }
+
+        [Fact]
+        public void GetAdminDeviceId_MultipleDevices_ReturnsEarliestActivated()
+        {
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-1", "PC-A", "alice");
+            store.TryAddDevice("dev-2", "PC-B", "bob");
+            store.TryAddDevice("dev-3", "PC-C", "carol");
+
+            // FirstActivatedAt を明示的に設定（追加順と最小が一致しないケース）。
+            store.Devices.First(d => d.DeviceId == "dev-1").FirstActivatedAt =
+                new DateTime(2026, 5, 10, 12, 0, 0);
+            store.Devices.First(d => d.DeviceId == "dev-2").FirstActivatedAt =
+                new DateTime(2026, 5, 8, 9, 0, 0);  // 最小
+            store.Devices.First(d => d.DeviceId == "dev-3").FirstActivatedAt =
+                new DateTime(2026, 5, 12, 18, 0, 0);
+
+            Assert.Equal("dev-2", store.GetAdminDeviceId());
+        }
+
+        [Fact]
+        public void GetAdminDeviceId_TieOnFirstActivatedAt_KeepsListOrder()
+        {
+            // FirstActivatedAt が同値のときはリスト内の出現順を保つ（OrderBy は安定ソート）。
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-1", "PC-A", "alice");
+            store.TryAddDevice("dev-2", "PC-B", "bob");
+            store.TryAddDevice("dev-3", "PC-C", "carol");
+
+            var same = new DateTime(2026, 5, 9, 10, 0, 0);
+            foreach (var d in store.Devices)
+                d.FirstActivatedAt = same;
+
+            Assert.Equal("dev-1", store.GetAdminDeviceId());
+        }
+
+        [Fact]
+        public void GetAdminDeviceId_AfterRemovingAdmin_ReturnsNextEarliest()
+        {
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-1", "PC-A", "alice");
+            store.TryAddDevice("dev-2", "PC-B", "bob");
+            store.TryAddDevice("dev-3", "PC-C", "carol");
+
+            store.Devices.First(d => d.DeviceId == "dev-1").FirstActivatedAt =
+                new DateTime(2026, 5, 8, 9, 0, 0);   // 管理者（最小）
+            store.Devices.First(d => d.DeviceId == "dev-2").FirstActivatedAt =
+                new DateTime(2026, 5, 10, 9, 0, 0);  // 次に早い
+            store.Devices.First(d => d.DeviceId == "dev-3").FirstActivatedAt =
+                new DateTime(2026, 5, 12, 9, 0, 0);
+
+            Assert.Equal("dev-1", store.GetAdminDeviceId());
+
+            // 管理者端末を解除 → 次に早い端末が自動的に管理者になる（特別な処理不要）。
+            Assert.True(store.RemoveDevice("dev-1"));
+            Assert.Equal("dev-2", store.GetAdminDeviceId());
+        }
+
+        [Fact]
+        public void GetAdminDeviceId_SurvivesSaveLoad()
+        {
+            // FirstActivatedAt は既存の永続フィールド ── 派生計算の管理者識別が
+            // Save/Load 後も一致すること（スキーマ不変の確認）。
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-1", "PC-A", "alice");
+            store.TryAddDevice("dev-2", "PC-B", "bob");
+            store.Devices.First(d => d.DeviceId == "dev-2").FirstActivatedAt =
+                new DateTime(2026, 5, 1, 0, 0, 0);  // dev-2 を最小に
+            store.Save();
+
+            var reloaded = ActivationStore.Load(TestKey, seatCount: 3);
+            Assert.Equal("dev-2", reloaded.GetAdminDeviceId());
+        }
     }
 
     // ---------------------------------------------------------------

@@ -6,6 +6,10 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize">
 
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
+
     <Grid Margin="28,24,28,24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -80,9 +84,24 @@
                                             <ColumnDefinition Width="150"/>
                                             <ColumnDefinition Width="92"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="{Binding MachineName}"
-                                                   FontSize="12" Foreground="#212121"
-                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding MachineName}"
+                                                       FontSize="12" Foreground="#212121"
+                                                       VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                            <!-- 管理者席バッジ。IsAdmin が true のときのみ表示。
+                                                 v0.2 は識別・表示のみ ── 権限差は無い。 -->
+                                            <Border Margin="6,0,0,0" Padding="5,1"
+                                                    CornerRadius="3" Background="#E3F2FD"
+                                                    VerticalAlignment="Center"
+                                                    Visibility="{Binding IsAdmin,
+                                                        Converter={StaticResource BoolToVis}}">
+                                                <TextBlock Text="{DynamicResource Seat_AdminBadge}"
+                                                           FontSize="10" FontWeight="SemiBold"
+                                                           Foreground="#1565C0"/>
+                                            </Border>
+                                        </StackPanel>
                                         <TextBlock Grid.Column="1" Text="{Binding UserName}"
                                                    FontSize="12" Foreground="#212121"
                                                    VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>

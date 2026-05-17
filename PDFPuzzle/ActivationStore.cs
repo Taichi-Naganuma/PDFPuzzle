@@ -138,6 +138,26 @@ namespace PDFPuzzle
             Devices = new List<DeviceRecord>()
         };
 
+        /// <summary>
+        /// 管理者席の deviceId を返す。= 最も早くアクティベートした端末
+        /// (<see cref="DeviceRecord.FirstActivatedAt"/> が最小)。端末が無ければ null。
+        /// 識別は派生計算で、永続フィールドは追加しない(スキーマ後方互換)。
+        /// <para>
+        /// v0.2 は識別・表示のみ ── 管理者に権限差は付与しない（権限設計は v0.3）。
+        /// 管理者端末を <see cref="RemoveDevice"/> すれば、次に早い端末が自動的に
+        /// 管理者になる（特別な処理は不要）。
+        /// </para>
+        /// </summary>
+        public string? GetAdminDeviceId()
+        {
+            // OrderBy は安定ソート ── FirstActivatedAt が同値のときは
+            // Devices リスト内の出現順を保つ。
+            return Devices
+                .OrderBy(d => d.FirstActivatedAt)
+                .FirstOrDefault()
+                ?.DeviceId;
+        }
+
         /// <summary>指定端末が登録済みか。</summary>
         public bool ContainsDevice(string deviceId)
             => Devices.Any(d => string.Equals(d.DeviceId, deviceId, StringComparison.OrdinalIgnoreCase));
