@@ -20,11 +20,22 @@ namespace PDFPuzzle
             CurrentTierText.Text = LocalizationService.Get(tier == LicenseTier.Business
                 ? "Tier_Business" : "Tier_Personal");
 
-            // 階層別の機能リスト + CTA ボタンの出し分け
+            // 階層別の機能リスト + CTA ボタンの出し分け。
+            // Personal / Business の表示制御は従来どおり（Team 分岐の追加のみ）。
             bool isBusiness = tier == LicenseTier.Business;
             PersonalFeaturesPanel.Visibility = isBusiness ? Visibility.Collapsed : Visibility.Visible;
             BusinessFeaturesPanel.Visibility = isBusiness ? Visibility.Visible : Visibility.Collapsed;
             UpgradeCtaButton.Visibility = isBusiness ? Visibility.Collapsed : Visibility.Visible;
+
+            // Row 5 は UpgradeCtaButton と ManageSeatsButton を共有する（同時表示はしない）。
+            // Personal → UpgradeCta 表示 / Team → ManageSeats 表示 / Business → どちらも非表示。
+            bool isTeam = tier == LicenseTier.Team;
+            ManageSeatsButton.Visibility = isTeam ? Visibility.Visible : Visibility.Collapsed;
+            if (isTeam)
+            {
+                // Team のときは UpgradeCta（個人版向け）を退避し、Row 5 を ManageSeats に明け渡す。
+                UpgradeCtaButton.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void UpgradeCtaButton_Click(object sender, RoutedEventArgs e)
@@ -44,6 +55,12 @@ namespace PDFPuzzle
             {
                 // 既定ブラウザ起動失敗時もウィンドウは維持
             }
+        }
+
+        private void ManageSeatsButton_Click(object sender, RoutedEventArgs e)
+        {
+            WiringGuard.WarnIfWrongSender(sender, "ManageSeatsButton");
+            new SeatManagementWindow { Owner = this }.ShowDialog();
         }
 
         private async void ActivateButton_Click(object sender, RoutedEventArgs e)

@@ -116,5 +116,25 @@
     <sys:String x:Key="License_Features_Business_3">Commercial-use license</sys:String>
     <sys:String x:Key="License_Features_Business_4">Install on multiple PCs</sys:String>
     <sys:String x:Key="License_Upgrade_Cta">Upgrade to Business Edition →</sys:String>
+    <sys:String x:Key="License_ManageSeats">Manage Seats →</sys:String>
+
+    <!-- Seat management window (Team Edition v0.2) -->
+    <sys:String x:Key="Seat_Title">Seat Management</sys:String>
+    <sys:String x:Key="Seat_KeyLabel">License key: </sys:String>
+    <sys:String x:Key="Seat_CountLabel">Seats: </sys:String>
+    <sys:String x:Key="Seat_CountSuffix"> in use</sys:String>
+    <sys:String x:Key="Seat_DevicesHeading">Registered devices</sys:String>
+    <sys:String x:Key="Seat_DevicesEmpty">No registered devices.</sys:String>
+    <sys:String x:Key="Seat_Col_Machine">Machine</sys:String>
+    <sys:String x:Key="Seat_Col_User">User</sys:String>
+    <sys:String x:Key="Seat_Col_LastUsed">Last used</sys:String>
+    <sys:String x:Key="Seat_Release">Release</sys:String>
+    <sys:String x:Key="Seat_Release_Confirm">Release the seat for this device?&#x0a;The freed seat can then be used on another device.</sys:String>
+    <sys:String x:Key="Seat_Release_Done">Seat released.</sys:String>
+    <sys:String x:Key="Seat_Release_Failed">Could not release the seat.</sys:String>
+    <sys:String x:Key="Seat_ExportCsv">Export Audit Log to CSV</sys:String>
+    <sys:String x:Key="Seat_ExportCsv_Done">Exported {0} log entries.&#x0a;{1}</sys:String>
+    <sys:String x:Key="Seat_ExportCsv_Failed">Failed to export the audit log.</sys:String>
+    <sys:String x:Key="Seat_Close">Close</sys:String>
 
 </ResourceDictionary>

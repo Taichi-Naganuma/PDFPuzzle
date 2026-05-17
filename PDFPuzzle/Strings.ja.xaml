@@ -116,5 +116,25 @@
     <sys:String x:Key="License_Features_Business_3">商用利用ライセンス</sys:String>
     <sys:String x:Key="License_Features_Business_4">複数 PC でのインストール可</sys:String>
     <sys:String x:Key="License_Upgrade_Cta">事業者版へアップグレード →</sys:String>
+    <sys:String x:Key="License_ManageSeats">席数を管理 →</sys:String>
+
+    <!-- 席数管理ウィンドウ（チーム版 v0.2） -->
+    <sys:String x:Key="Seat_Title">席数の管理</sys:String>
+    <sys:String x:Key="Seat_KeyLabel">ライセンスキー: </sys:String>
+    <sys:String x:Key="Seat_CountLabel">席数: </sys:String>
+    <sys:String x:Key="Seat_CountSuffix"> 使用中</sys:String>
+    <sys:String x:Key="Seat_DevicesHeading">登録済みの端末</sys:String>
+    <sys:String x:Key="Seat_DevicesEmpty">登録済みの端末はありません。</sys:String>
+    <sys:String x:Key="Seat_Col_Machine">端末名</sys:String>
+    <sys:String x:Key="Seat_Col_User">ユーザー名</sys:String>
+    <sys:String x:Key="Seat_Col_LastUsed">最終利用日時</sys:String>
+    <sys:String x:Key="Seat_Release">席を解除</sys:String>
+    <sys:String x:Key="Seat_Release_Confirm">この端末の席を解除します。よろしいですか？&#x0a;解除後、空いた席は別の端末で利用できます。</sys:String>
+    <sys:String x:Key="Seat_Release_Done">席を解除しました。</sys:String>
+    <sys:String x:Key="Seat_Release_Failed">席を解除できませんでした。</sys:String>
+    <sys:String x:Key="Seat_ExportCsv">監査ログをCSV出力</sys:String>
+    <sys:String x:Key="Seat_ExportCsv_Done">{0}件のログを書き出しました。&#x0a;{1}</sys:String>
+    <sys:String x:Key="Seat_ExportCsv_Failed">監査ログの書き出しに失敗しました。</sys:String>
+    <sys:String x:Key="Seat_Close">閉じる</sys:String>
 
 </ResourceDictionary>

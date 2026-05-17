@@ -93,6 +93,16 @@
                 Visibility="Collapsed"
                 Click="UpgradeCtaButton_Click"/>
 
+        <!-- 席数管理（チーム版のみ表示・UpgradeCtaButton と同じ Row 5・排他制御） -->
+        <Button x:Name="ManageSeatsButton" Grid.Row="5"
+                Content="{DynamicResource License_ManageSeats}"
+                Height="34" Margin="0,4,0,12"
+                Background="#1565C0" Foreground="White"
+                FontWeight="Bold" BorderThickness="0"
+                HorizontalAlignment="Stretch"
+                Visibility="Collapsed"
+                Click="ManageSeatsButton_Click"/>
+
         <!-- ライセンスキーラベル -->
         <TextBlock Grid.Row="6"
                    Text="{DynamicResource License_KeyLabel}"

@@ -637,6 +637,91 @@ namespace PDFPuzzle.Tests
     }
 
     // ---------------------------------------------------------------
+    // 1-E. SeatDisplayFormatter — 席数管理ウィンドウの表示整形（v0.2 第2次）
+    //   UI 非依存の純関数。SeatManagementWindow から切り出して単体テストする。
+    // ---------------------------------------------------------------
+    public class SeatDisplayFormatterTest
+    {
+        // --- MaskLicenseKey: 末尾4文字以外をマスク ---
+
+        [Fact]
+        public void MaskLicenseKey_TypicalKey_OnlyLast4Visible()
+        {
+            // 19文字 → 末尾4文字 "A1B2" のみ可視、残り15文字はマスク。
+            var masked = SeatDisplayFormatter.MaskLicenseKey("ABCD-1234-EFGH-A1B2");
+            Assert.EndsWith("A1B2", masked);
+            Assert.Equal(19, masked.Length);
+            Assert.Equal(new string('•', 15), masked.Substring(0, 15));
+            // 生キーの可視部以外は露出しない。
+            Assert.DoesNotContain("ABCD", masked);
+            Assert.DoesNotContain("1234", masked);
+        }
+
+        [Fact]
+        public void MaskLicenseKey_NullOrEmpty_ReturnsEmpty()
+        {
+            Assert.Equal(string.Empty, SeatDisplayFormatter.MaskLicenseKey(null));
+            Assert.Equal(string.Empty, SeatDisplayFormatter.MaskLicenseKey(string.Empty));
+        }
+
+        [Theory]
+        [InlineData("AB", 2)]
+        [InlineData("ABCD", 4)]
+        public void MaskLicenseKey_ShortKey_FullyMasked(string key, int expectedLen)
+        {
+            // 全長4以下は末尾4文字を取り出せないため全マスク。
+            var masked = SeatDisplayFormatter.MaskLicenseKey(key);
+            Assert.Equal(new string('•', expectedLen), masked);
+        }
+
+        [Fact]
+        public void MaskLicenseKey_FiveChars_Last4Visible()
+        {
+            var masked = SeatDisplayFormatter.MaskLicenseKey("ABCDE");
+            Assert.Equal("•BCDE", masked);
+        }
+
+        // --- FormatSeatCount ---
+
+        [Theory]
+        [InlineData(0, 3, "0 / 3")]
+        [InlineData(2, 3, "2 / 3")]
+        [InlineData(5, 5, "5 / 5")]
+        [InlineData(5, 3, "5 / 3")] // ダウングレード超過: そのまま N / M 表記。
+        public void FormatSeatCount_ReturnsNSlashM(int used, int total, string expected)
+            => Assert.Equal(expected, SeatDisplayFormatter.FormatSeatCount(used, total));
+
+        // --- ProgressMaximum ---
+
+        [Fact]
+        public void ProgressMaximum_NormalCase_ReturnsSeatCount()
+            => Assert.Equal(3d, SeatDisplayFormatter.ProgressMaximum(2, 3));
+
+        [Fact]
+        public void ProgressMaximum_UsedExceedsSeatCount_ReturnsUsed()
+        {
+            // ダウングレード超過: Value <= Maximum を保つため Maximum に usedSeats を採用。
+            Assert.Equal(5d, SeatDisplayFormatter.ProgressMaximum(5, 3));
+        }
+
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(0, -1)]
+        public void ProgressMaximum_SeatCountZeroOrNegative_ReturnsAtLeast1(int used, int seatCount)
+        {
+            // 0 / 負の seatCount でも見た目崩れ・0 除算を避けるため最低 1。
+            Assert.Equal(1d, SeatDisplayFormatter.ProgressMaximum(used, seatCount));
+        }
+
+        [Fact]
+        public void ProgressMaximum_UsedExceedsZeroSeatCount_ReturnsUsed()
+        {
+            // seatCount=0 でも used=2 なら Maximum=2（Value=2 を収容）。
+            Assert.Equal(2d, SeatDisplayFormatter.ProgressMaximum(2, 0));
+        }
+    }
+
+    // ---------------------------------------------------------------
     // 3-A. LogService.StartRun — 監査フィールドの自動付与（第3次）
     // ---------------------------------------------------------------
     public class LogServiceAuditFieldsTest
