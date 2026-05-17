@@ -68,25 +68,71 @@ namespace PDFPuzzle
         }
 
         /// <summary>
-        /// verify レスポンスから席数を抽出する。Team 以外は常に 1。
-        /// 抽出不能時は 3（v0 フェイルセーフ）。
+        /// verify レスポンスから席数を抽出する（v0.2 ── Gumroad multiseat 連携）。
+        /// 判定順:
+        ///  1) Team 以外（Personal / Business）→ 常に 1。
+        ///  2) verify root に <c>is_multiseat_license == true</c> があり、かつ
+        ///     <c>purchase.quantity</c> が正の整数として読める → その値を席数とする。
+        ///  3) 補助フォールバック: <c>purchase.variants_and_quantity</c> 末尾の "(N)"
+        ///     （N は正の整数）を抽出 → その値を席数とする。
+        ///  4) 上記いずれにも当てはまらない → 3（v0 フェイルセーフ。安全側）。
+        /// <para>
+        /// <c>is_multiseat_license</c> フラグと <c>quantity</c> は必ず組で見る。
+        /// フラグを見ずに <c>quantity</c> を席数に使うと、単席購入の購入数量を席数と
+        /// 誤認する事故になる（Gumroad API 検証ノート Q-5）。
+        /// </para>
         /// </summary>
         public static int ResolveSeatCount(JsonElement root, LicenseTier tier)
         {
+            // ルール1: 個人版・事業者版は常に1席。
             if (tier != LicenseTier.Team) return 1;
-            if (root.TryGetProperty("purchase", out var purchase) && purchase.ValueKind == JsonValueKind.Object)
+
+            // ルール2: is_multiseat_license フラグ + purchase.quantity を組で見る。
+            if (IsMultiseatLicense(root)
+                && root.TryGetProperty("purchase", out var purchase)
+                && purchase.ValueKind == JsonValueKind.Object
+                && TryGetPositiveInt(purchase, "quantity", out var seats))
             {
-                // 1) purchase.quantity(Number)を最優先
-                if (purchase.TryGetProperty("quantity", out var q) && q.ValueKind == JsonValueKind.Number)
-                    return q.GetInt32();
-                // 2) variants_and_quantity 末尾 "(N)" を正規表現で抽出(フォールバック)
-                if (purchase.TryGetProperty("variants_and_quantity", out var vq) && vq.ValueKind == JsonValueKind.String)
-                {
-                    var m = System.Text.RegularExpressions.Regex.Match(vq.GetString() ?? "", @"\((\d+)\)\s*$");
-                    if (m.Success && int.TryParse(m.Groups[1].Value, out var n)) return n;
-                }
+                return seats;
             }
-            return 3; // フェイルセーフ
+
+            // ルール3（補助フォールバック）: variants_and_quantity 末尾 "(N)" を抽出。
+            if (root.TryGetProperty("purchase", out var p) && p.ValueKind == JsonValueKind.Object
+                && p.TryGetProperty("variants_and_quantity", out var vq)
+                && vq.ValueKind == JsonValueKind.String)
+            {
+                var m = System.Text.RegularExpressions.Regex.Match(vq.GetString() ?? "", @"\((\d+)\)\s*$");
+                if (m.Success && int.TryParse(m.Groups[1].Value, out var n) && n > 0)
+                    return n;
+            }
+
+            // ルール4: フェイルセーフ（v0 と同じ 3 固定）。
+            return 3;
+        }
+
+        /// <summary>
+        /// verify root の <c>is_multiseat_license</c> が真偽値 true のときのみ true。
+        /// 不在・型不一致・false は false（安全側）。
+        /// </summary>
+        private static bool IsMultiseatLicense(JsonElement root)
+        {
+            return root.TryGetProperty("is_multiseat_license", out var flag)
+                && flag.ValueKind == JsonValueKind.True;
+        }
+
+        /// <summary>
+        /// 指定オブジェクトのプロパティを正の整数として安全に取得する。
+        /// Number でない／整数化できない／0 以下なら false（例外を投げない）。
+        /// </summary>
+        private static bool TryGetPositiveInt(JsonElement obj, string propertyName, out int value)
+        {
+            value = 0;
+            if (!obj.TryGetProperty(propertyName, out var prop) || prop.ValueKind != JsonValueKind.Number)
+                return false;
+            if (!prop.TryGetInt32(out var n) || n <= 0)
+                return false;
+            value = n;
+            return true;
         }
 
         private static bool Match(string haystack, string needle)

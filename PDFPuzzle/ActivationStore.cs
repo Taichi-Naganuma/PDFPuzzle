@@ -66,10 +66,33 @@ namespace PDFPuzzle
         }
 
         /// <summary>
-        /// ライセンスキーに対応する store を読み込む。
-        /// 対応ファイルが無い／読込失敗時は新規 store（seatCount で初期化）として扱う。
+        /// ライセンスキーに対応する store を読み込む（席数を権威更新しない版）。
+        /// ファイルに記録済みの <see cref="SeatCount"/> をそのまま読む。
+        /// 席返却（<c>ReleaseSeat</c> 等）のように席数の権威更新を要さない呼び出し用。
+        /// 対応ファイルが無い／読込失敗時は新規 store（フェイルセーフ 3 席）として扱う。
         /// </summary>
-        public static ActivationStore Load(string licenseKey, int seatCount = 3)
+        public static ActivationStore Load(string licenseKey)
+            => LoadInternal(licenseKey, authoritativeSeatCount: null, fallbackSeatCount: 3);
+
+        /// <summary>
+        /// ライセンスキーに対応する store を読み込み、<paramref name="seatCount"/> を
+        /// store の権威値として採用する（v0.2 ── verify レスポンス由来の席数を反映）。
+        /// 既存ファイルに記録された <see cref="SeatCount"/> と異なる場合は
+        /// <paramref name="seatCount"/> で上書きする（ライセンスのアップグレード反映）。
+        /// 対応ファイルが無い／読込失敗時は新規 store（<paramref name="seatCount"/> で初期化）として扱う。
+        /// </summary>
+        /// <param name="licenseKey">verify に成功したライセンスキー（生キー）。</param>
+        /// <param name="seatCount">verify レスポンスから判定した席数（権威値）。</param>
+        public static ActivationStore Load(string licenseKey, int seatCount)
+            => LoadInternal(licenseKey, authoritativeSeatCount: seatCount, fallbackSeatCount: seatCount);
+
+        /// <summary>
+        /// <see cref="Load(string)"/> / <see cref="Load(string,int)"/> の共通処理。
+        /// <paramref name="authoritativeSeatCount"/> が非 null のとき、読み込んだ store の
+        /// <see cref="SeatCount"/> をその値で上書きする（席数の権威化）。
+        /// </summary>
+        private static ActivationStore LoadInternal(
+            string licenseKey, int? authoritativeSeatCount, int fallbackSeatCount)
         {
             string hash = HashLicenseKey(licenseKey);
             string filePath = Path.Combine(BaseDir, $"{hash}.json");
@@ -80,22 +103,30 @@ namespace PDFPuzzle
                 if (File.Exists(filePath))
                 {
                     string json = File.ReadAllText(filePath);
-                    store = JsonSerializer.Deserialize<ActivationStore>(json, JsonOptions) ?? NewStore(hash, seatCount);
+                    store = JsonSerializer.Deserialize<ActivationStore>(json, JsonOptions)
+                            ?? NewStore(hash, fallbackSeatCount);
                 }
                 else
                 {
-                    store = NewStore(hash, seatCount);
+                    store = NewStore(hash, fallbackSeatCount);
                 }
             }
             catch
             {
                 // 読込失敗は新規 store として扱う（AppSettings.Load() と同じ堅牢性）。
-                store = NewStore(hash, seatCount);
+                store = NewStore(hash, fallbackSeatCount);
             }
 
             // 識別子の整合性を担保（破損ファイル対策）。
             store.LicenseKeyHash = hash;
             store._filePath = filePath;
+
+            // 席数の権威化: verify 由来の値が渡された場合、ファイル記録値と異なれば上書きする
+            // （ライセンスのアップグレード = 3席→5席 を反映）。
+            // ダウングレード（席数縮小）の超過端末強制解除は第1次の範囲外（値の更新のみ）。
+            if (authoritativeSeatCount.HasValue)
+                store.SeatCount = authoritativeSeatCount.Value;
+
             return store;
         }
 

@@ -100,18 +100,74 @@ namespace PDFPuzzle.Tests
             Assert.Equal(LicenseTier.Personal, LicenseTierResolver.Resolve(root));
         }
 
-        // --- ResolveSeatCount() ---
+        // --- ResolveSeatCount() ── v0.2: is_multiseat_license フラグ + quantity 併用 ---
 
         [Fact]
-        public void ResolveSeatCount_QuantityField_ReturnsQuantity()
+        public void ResolveSeatCount_MultiseatFlag_WithQuantity5_Returns5()
         {
-            var root = Parse("""{ "purchase": { "quantity": 5 } }""");
+            // is_multiseat_license:true + quantity:5 → 5 席。
+            var root = Parse(
+                """{ "is_multiseat_license": true, "purchase": { "quantity": 5 } }""");
             Assert.Equal(5, LicenseTierResolver.ResolveSeatCount(root, LicenseTier.Team));
+        }
+
+        [Fact]
+        public void ResolveSeatCount_MultiseatFlag_WithQuantity10_Returns10()
+        {
+            var root = Parse(
+                """{ "is_multiseat_license": true, "purchase": { "quantity": 10 } }""");
+            Assert.Equal(10, LicenseTierResolver.ResolveSeatCount(root, LicenseTier.Team));
+        }
+
+        [Fact]
+        public void ResolveSeatCount_MultiseatFlag_QuantityMissing_ReturnsFailsafe3()
+        {
+            // フラグはあるが quantity 欠損 → フェイルセーフ 3。
+            var root = Parse(
+                """{ "is_multiseat_license": true, "purchase": { "variants": "(Team Edition)" } }""");
+            Assert.Equal(3, LicenseTierResolver.ResolveSeatCount(root, LicenseTier.Team));
+        }
+
+        [Fact]
+        public void ResolveSeatCount_QuantityWithoutFlag_NotUsedAsSeatCount_ReturnsFailsafe3()
+        {
+            // is_multiseat_license 不在 + quantity:5 → quantity を席数に使わない（事故防止）→ 3。
+            var root = Parse("""{ "purchase": { "quantity": 5 } }""");
+            Assert.Equal(3, LicenseTierResolver.ResolveSeatCount(root, LicenseTier.Team));
+        }
+
+        [Fact]
+        public void ResolveSeatCount_MultiseatFlagFalse_WithQuantity_ReturnsFailsafe3()
+        {
+            // is_multiseat_license:false + quantity:5 → フラグ false なので席数に使わない → 3。
+            var root = Parse(
+                """{ "is_multiseat_license": false, "purchase": { "quantity": 5 } }""");
+            Assert.Equal(3, LicenseTierResolver.ResolveSeatCount(root, LicenseTier.Team));
+        }
+
+        [Fact]
+        public void ResolveSeatCount_MultiseatFlag_QuantityZeroOrNegative_ReturnsFailsafe3()
+        {
+            // quantity が 0 / 負 は正の整数でないためフェイルセーフへ落ちる。
+            var zero = Parse("""{ "is_multiseat_license": true, "purchase": { "quantity": 0 } }""");
+            Assert.Equal(3, LicenseTierResolver.ResolveSeatCount(zero, LicenseTier.Team));
+            var negative = Parse("""{ "is_multiseat_license": true, "purchase": { "quantity": -2 } }""");
+            Assert.Equal(3, LicenseTierResolver.ResolveSeatCount(negative, LicenseTier.Team));
+        }
+
+        [Fact]
+        public void ResolveSeatCount_MultiseatFlag_QuantityWrongType_ReturnsFailsafe3()
+        {
+            // quantity が文字列など Number でない型 → 例外でなくフェイルセーフへ。
+            var root = Parse(
+                """{ "is_multiseat_license": true, "purchase": { "quantity": "five" } }""");
+            Assert.Equal(3, LicenseTierResolver.ResolveSeatCount(root, LicenseTier.Team));
         }
 
         [Fact]
         public void ResolveSeatCount_VariantsAndQuantityFallback_ReturnsParsedNumber()
         {
+            // 補助フォールバック（ルール3）: multiseat フラグ無しでも variants_and_quantity 末尾 "(N)" を抽出。
             var root = Parse("""{ "purchase": { "variants_and_quantity": "(Team) (10)" } }""");
             Assert.Equal(10, LicenseTierResolver.ResolveSeatCount(root, LicenseTier.Team));
         }
@@ -135,8 +191,10 @@ namespace PDFPuzzle.Tests
         [InlineData("Business")]
         public void ResolveSeatCount_NonTeamTier_AlwaysReturns1(string tierName)
         {
+            // 非 Team は multiseat JSON でも常に 1（後方互換: ルール1で即 1 に落とす）。
             var tier = Enum.Parse<LicenseTier>(tierName);
-            var root = Parse("""{ "purchase": { "quantity": 5 } }""");
+            var root = Parse(
+                """{ "is_multiseat_license": true, "purchase": { "quantity": 5 } }""");
             Assert.Equal(1, LicenseTierResolver.ResolveSeatCount(root, tier));
         }
     }
@@ -327,6 +385,62 @@ namespace PDFPuzzle.Tests
             Assert.Equal(0, store.UsedSeats);
             Assert.Equal(3, store.SeatCount);
         }
+
+        // --- v0.2: 席数の権威化（verify 由来の seatCount を採用） ---
+
+        [Theory]
+        [InlineData(5)]
+        [InlineData(10)]
+        public void NewStore_SeatCount_ReflectsPassedValue(int seatCount)
+        {
+            var store = ActivationStore.Load(TestKey, seatCount);
+            Assert.Equal(seatCount, store.SeatCount);
+        }
+
+        [Fact]
+        public void Load_WithSeatCount_OverridesRecordedValue_OnUpgrade()
+        {
+            // 3 席で作成・保存。
+            var store3 = ActivationStore.Load(TestKey, seatCount: 3);
+            store3.TryAddDevice("dev-1", "PC-A", "alice");
+            store3.Save();
+
+            // 同じキーを 5 席で Load → ファイル記録値（3）を 5 で上書き（アップグレード反映）。
+            var store5 = ActivationStore.Load(TestKey, seatCount: 5);
+            Assert.Equal(5, store5.SeatCount);
+            // 既存端末は維持される。
+            Assert.Equal(1, store5.UsedSeats);
+            Assert.True(store5.ContainsDevice("dev-1"));
+        }
+
+        [Fact]
+        public void Load_WithoutSeatCount_KeepsRecordedValue()
+        {
+            // 5 席で作成・保存。
+            var store5 = ActivationStore.Load(TestKey, seatCount: 5);
+            store5.TryAddDevice("dev-1", "PC-A", "alice");
+            store5.Save();
+
+            // seatCount 引数なしの Load はファイル記録値（5）をそのまま読む（席返却用途）。
+            var reloaded = ActivationStore.Load(TestKey);
+            Assert.Equal(5, reloaded.SeatCount);
+            Assert.Equal(1, reloaded.UsedSeats);
+        }
+
+        [Fact]
+        public void Load_WithSeatCount_Downgrade_UpdatesValueOnly_KeepsExcessDevices()
+        {
+            // 5 席で 5 端末登録・保存。
+            var store5 = ActivationStore.Load(TestKey, seatCount: 5);
+            for (int i = 1; i <= 5; i++)
+                store5.TryAddDevice($"dev-{i}", $"PC-{i}", $"user-{i}");
+            store5.Save();
+
+            // 3 席で Load（ダウングレード）。第1次は値の更新のみ・超過端末の強制解除はしない。
+            var store3 = ActivationStore.Load(TestKey, seatCount: 3);
+            Assert.Equal(3, store3.SeatCount);
+            Assert.Equal(5, store3.UsedSeats); // 超過端末はそのまま残る（縮約は範囲外）。
+        }
     }
 
     // ---------------------------------------------------------------
@@ -390,6 +504,63 @@ namespace PDFPuzzle.Tests
             var store = ActivationStore.Load(TeamKey, seatCount: 3);
             Assert.Equal(3, store.UsedSeats);
             Assert.False(store.ContainsDevice("dev-4"));
+        }
+
+        // --- v0.2: 席数パラメタライズド（N 端末 OK / N+1 端末 NG） ---
+
+        [Theory]
+        [InlineData(3)]
+        [InlineData(5)]
+        [InlineData(10)]
+        public void TryConsumeSeat_Team_NDevicesOk_NPlus1Rejected(int seatCount)
+        {
+            // N 端末まで席消費に成功する。
+            for (int i = 1; i <= seatCount; i++)
+            {
+                Assert.True(TeamSeatService.TryConsumeSeat(
+                    TeamKey, LicenseTier.Team, seatCount,
+                    $"dev-{i}", $"PC-{i}", $"user-{i}"));
+            }
+
+            // N+1 端末目は満席で拒否。
+            Assert.False(TeamSeatService.TryConsumeSeat(
+                TeamKey, LicenseTier.Team, seatCount,
+                $"dev-{seatCount + 1}", $"PC-{seatCount + 1}", $"user-{seatCount + 1}"));
+
+            var store = ActivationStore.Load(TeamKey, seatCount);
+            Assert.Equal(seatCount, store.UsedSeats);
+            Assert.False(store.ContainsDevice($"dev-{seatCount + 1}"));
+        }
+
+        // --- v0.2: アップグレード反映（3席 store を 5席で Load し直すと 4・5 端末目が入る） ---
+
+        [Fact]
+        public void TryConsumeSeat_Upgrade_3To5_AllowsAdditionalSeats()
+        {
+            // 3 席で 3 端末まで埋める。
+            for (int i = 1; i <= 3; i++)
+            {
+                Assert.True(TeamSeatService.TryConsumeSeat(
+                    TeamKey, LicenseTier.Team, seatCount: 3,
+                    $"dev-{i}", $"PC-{i}", $"user-{i}"));
+            }
+            // 3 席のままなら 4 端末目は拒否。
+            Assert.False(TeamSeatService.TryConsumeSeat(
+                TeamKey, LicenseTier.Team, seatCount: 3, "dev-4", "PC-4", "user-4"));
+
+            // 5 席へアップグレード（verify 由来の席数が 5 に変わった想定）。
+            // 4・5 端末目が登録できる。
+            Assert.True(TeamSeatService.TryConsumeSeat(
+                TeamKey, LicenseTier.Team, seatCount: 5, "dev-4", "PC-4", "user-4"));
+            Assert.True(TeamSeatService.TryConsumeSeat(
+                TeamKey, LicenseTier.Team, seatCount: 5, "dev-5", "PC-5", "user-5"));
+            // 6 端末目は新席数（5）で拒否。
+            Assert.False(TeamSeatService.TryConsumeSeat(
+                TeamKey, LicenseTier.Team, seatCount: 5, "dev-6", "PC-6", "user-6"));
+
+            var store = ActivationStore.Load(TeamKey, seatCount: 5);
+            Assert.Equal(5, store.SeatCount);
+            Assert.Equal(5, store.UsedSeats);
         }
 
         // --- 既存端末の再 TryConsumeSeat: 席数不変で true ---
