@@ -531,6 +531,162 @@ namespace PDFPuzzle.Tests
             var reloaded = ActivationStore.Load(TestKey, seatCount: 3);
             Assert.Equal("dev-2", reloaded.GetAdminDeviceId());
         }
+
+        // --- v0.2 第7次: 端末の編集可能ラベル（SetDisplayLabel / DisplayLabel） ---
+
+        [Fact]
+        public void SetDisplayLabel_RegisteredDevice_SetsLabel_ReturnsTrue()
+        {
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-1", "PC-A", "alice");
+
+            Assert.True(store.SetDisplayLabel("dev-1", "経理・田中さん"));
+            Assert.Equal("経理・田中さん",
+                store.Devices.First(d => d.DeviceId == "dev-1").DisplayLabel);
+        }
+
+        [Fact]
+        public void SetDisplayLabel_UnknownDevice_ReturnsFalse()
+        {
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-1", "PC-A", "alice");
+
+            Assert.False(store.SetDisplayLabel("ghost", "ラベル"));
+        }
+
+        [Fact]
+        public void SetDisplayLabel_IsCaseInsensitiveOnDeviceId()
+        {
+            // 端末特定は Find（OrdinalIgnoreCase）── deviceId の大文字小文字差を吸収する。
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-AbC", "PC-A", "alice");
+
+            Assert.True(store.SetDisplayLabel("DEV-abc", "2F 共用PC"));
+            Assert.Equal("2F 共用PC",
+                store.Devices.First(d => d.DeviceId == "dev-AbC").DisplayLabel);
+        }
+
+        [Fact]
+        public void SetDisplayLabel_TrimsSurroundingWhitespace()
+        {
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-1", "PC-A", "alice");
+
+            Assert.True(store.SetDisplayLabel("dev-1", "  経理PC  "));
+            Assert.Equal("経理PC",
+                store.Devices.First(d => d.DeviceId == "dev-1").DisplayLabel);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        [InlineData("\t  \r\n ")]
+        [InlineData(null)]
+        public void SetDisplayLabel_EmptyOrWhitespace_NormalizedToNull(string? input)
+        {
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-1", "PC-A", "alice");
+            // 一度ラベルを付けてから空入力で消せること（クリア動作）。
+            store.SetDisplayLabel("dev-1", "旧ラベル");
+
+            Assert.True(store.SetDisplayLabel("dev-1", input));
+            Assert.Null(store.Devices.First(d => d.DeviceId == "dev-1").DisplayLabel);
+        }
+
+        [Fact]
+        public void SetDisplayLabel_OverLimit_TruncatedTo40Chars()
+        {
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-1", "PC-A", "alice");
+
+            // 41 文字 → 先頭 40 文字に切り詰め。
+            var input = new string('あ', 41);
+            Assert.True(store.SetDisplayLabel("dev-1", input));
+            var label = store.Devices.First(d => d.DeviceId == "dev-1").DisplayLabel;
+            Assert.NotNull(label);
+            Assert.Equal(40, label!.Length);
+            Assert.Equal(new string('あ', 40), label);
+        }
+
+        [Fact]
+        public void SetDisplayLabel_Exactly40Chars_KeptAsIs()
+        {
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-1", "PC-A", "alice");
+
+            var input = new string('x', 40);
+            Assert.True(store.SetDisplayLabel("dev-1", input));
+            Assert.Equal(input, store.Devices.First(d => d.DeviceId == "dev-1").DisplayLabel);
+        }
+
+        [Fact]
+        public void SetDisplayLabel_TrimThenTruncate_AppliesInOrder()
+        {
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-1", "PC-A", "alice");
+
+            // 前後空白を trim した後の 45 文字を 40 文字へ切り詰める。
+            var input = "  " + new string('z', 45) + "  ";
+            Assert.True(store.SetDisplayLabel("dev-1", input));
+            Assert.Equal(new string('z', 40),
+                store.Devices.First(d => d.DeviceId == "dev-1").DisplayLabel);
+        }
+
+        [Fact]
+        public void DisplayLabel_RoundTripsThroughSaveLoad()
+        {
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-1", "PC-A", "alice");
+            store.TryAddDevice("dev-2", "PC-B", "bob");
+            store.SetDisplayLabel("dev-1", "経理・田中さん");
+            store.Save();
+
+            var reloaded = ActivationStore.Load(TestKey, seatCount: 3);
+            Assert.Equal("経理・田中さん",
+                reloaded.Devices.First(d => d.DeviceId == "dev-1").DisplayLabel);
+            // 未設定端末は null のまま。
+            Assert.Null(reloaded.Devices.First(d => d.DeviceId == "dev-2").DisplayLabel);
+        }
+
+        [Fact]
+        public void DisplayLabel_DefaultIsNull_OnNewDevice()
+        {
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            store.TryAddDevice("dev-1", "PC-A", "alice");
+            Assert.Null(store.Devices.First(d => d.DeviceId == "dev-1").DisplayLabel);
+        }
+
+        [Fact]
+        public void Load_LegacyJsonWithoutDisplayLabel_DeserializesWithNullLabel()
+        {
+            // DisplayLabel フィールドを持たない旧形式 JSON を直接配置 → Load で例外なし・null。
+            var hash = ActivationStore.HashLicenseKey(TestKey);
+            var legacyJson = """
+            {
+              "LicenseKeyHash": "PLACEHOLDER",
+              "SeatCount": 3,
+              "Tier": "Team",
+              "Devices": [
+                {
+                  "DeviceId": "dev-legacy",
+                  "MachineName": "OLD-PC",
+                  "UserName": "olduser",
+                  "FirstActivatedAt": "2026-01-01T10:00:00",
+                  "LastUsedAt": "2026-01-02T11:00:00"
+                }
+              ]
+            }
+            """.Replace("PLACEHOLDER", hash);
+            File.WriteAllText(Path.Combine(_tempDir, $"{hash}.json"), legacyJson);
+
+            var store = ActivationStore.Load(TestKey, seatCount: 3);
+            Assert.Equal(1, store.UsedSeats);
+            var dev = store.Devices.First(d => d.DeviceId == "dev-legacy");
+            Assert.Null(dev.DisplayLabel);
+            // 旧フィールドはそのまま読めること（回帰確認）。
+            Assert.Equal("OLD-PC", dev.MachineName);
+            Assert.Equal("olduser", dev.UserName);
+        }
     }
 
     // ---------------------------------------------------------------

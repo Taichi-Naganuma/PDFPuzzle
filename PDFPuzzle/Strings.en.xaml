@@ -149,5 +149,9 @@
     <sys:String x:Key="Seat_ExportCsv_Failed">Failed to export the audit log.</sys:String>
     <sys:String x:Key="Seat_Close">Close</sys:String>
     <sys:String x:Key="Seat_AdminBadge">Admin</sys:String>
+    <sys:String x:Key="Seat_LabelPrompt">Label:</sys:String>
+    <sys:String x:Key="Seat_SaveLabel">Save</sys:String>
+    <sys:String x:Key="Seat_Label_Saved">Label saved.</sys:String>
+    <sys:String x:Key="Seat_Label_Failed">Failed to save label.</sys:String>
 
 </ResourceDictionary>

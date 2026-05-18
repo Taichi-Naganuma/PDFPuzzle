@@ -29,6 +29,13 @@ namespace PDFPuzzle
             /// v0.2 は識別・表示のみ ── true でも権限差は無い（解除も従来どおり可能）。
             /// </summary>
             public bool IsAdmin { get; init; }
+
+            /// <summary>
+            /// 端末の表示ラベル（任意のユーザー名タグ）。TextBox に TwoWay バインドして
+            /// 書き戻すため init ではなく set。<see cref="ActivationStore.DeviceRecord.DisplayLabel"/>
+            /// が null のときは空文字で初期化する。
+            /// </summary>
+            public string DisplayLabel { get; set; } = string.Empty;
         }
 
         // 現在表示中のライセンスキー（生キー）。Refresh のたびに store を Load し直す。
@@ -72,6 +79,7 @@ namespace PDFPuzzle
                     LastUsedAtDisplay = d.LastUsedAt.ToString("yyyy/MM/dd HH:mm"),
                     IsAdmin = adminId != null
                         && string.Equals(d.DeviceId, adminId, StringComparison.OrdinalIgnoreCase),
+                    DisplayLabel = d.DisplayLabel ?? string.Empty,
                 });
             }
             DeviceListControl.ItemsSource = rows;
@@ -112,6 +120,37 @@ namespace PDFPuzzle
             StatusText.Foreground = removed ? Brushes.DarkGreen : Brushes.Crimson;
             StatusText.Text = LocalizationService.Get(
                 removed ? "Seat_Release_Done" : "Seat_Release_Failed");
+        }
+
+        /// <summary>
+        /// 端末1件の表示ラベルを保存する。保存ボタンは DataTemplate 内で端末ごとに複製されるため、
+        /// x:Name 突合（<see cref="WiringGuard"/>）は不可。対象端末は <see cref="Button.DataContext"/>
+        /// （= <see cref="DeviceRow"/>）から取得する。編集中のラベル文字列は同じ行の TextBox に
+        /// TwoWay バインドされた <see cref="DeviceRow.DisplayLabel"/> から読む。
+        /// </summary>
+        private void SaveLabelButton_Click(object sender, RoutedEventArgs e)
+        {
+            // §5 サニティチェック: DataContext に DeviceRow が載り、DeviceId が空でないかをガード。
+            if (sender is not Button btn
+                || btn.DataContext is not DeviceRow row
+                || string.IsNullOrWhiteSpace(row.DeviceId))
+            {
+                Trace.TraceWarning(
+                    "[SeatManagementWindow.SaveLabelButton_Click] DataContext に DeviceRow が無い ── 配線確認要。");
+                return;
+            }
+
+            // v0 のローカル activations\ 方式どおり、ラベル編集はローカルファイルのみに作用（中央同期なし）。
+            var store = ActivationStore.Load(_licenseKey);
+            bool ok = store.SetDisplayLabel(row.DeviceId, row.DisplayLabel);
+            if (ok)
+                store.Save();
+
+            RefreshDisplay();
+
+            StatusText.Foreground = ok ? Brushes.DarkGreen : Brushes.Crimson;
+            StatusText.Text = LocalizationService.Get(
+                ok ? "Seat_Label_Saved" : "Seat_Label_Failed");
         }
 
         /// <summary>監査ログを CSV として書き出す（<see cref="LogService.ExportTeamAuditCsv"/> を呼ぶだけ）。</summary>

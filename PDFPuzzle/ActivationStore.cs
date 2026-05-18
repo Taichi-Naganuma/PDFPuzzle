@@ -34,6 +34,14 @@ namespace PDFPuzzle
             public string UserName { get; set; } = string.Empty;
             public DateTime FirstActivatedAt { get; set; } = DateTime.Now;
             public DateTime LastUsedAt { get; set; } = DateTime.Now;
+
+            /// <summary>
+            /// ユーザーが任意に付ける端末の表示ラベル（例「経理・田中さん」）。
+            /// 未設定は null。旧 activations JSON はこのフィールドを持たないため
+            /// 読み込み時 null になる（後方互換 ── M5 第3次の監査フィールド追加と同パターン）。
+            /// OS ユーザー名 UserName とは別物 ── UserName の意味は変えない。
+            /// </summary>
+            public string? DisplayLabel { get; set; }
         }
 
         // --- 永続化されるフィールド ---
@@ -201,6 +209,30 @@ namespace PDFPuzzle
             var existing = Find(deviceId);
             if (existing != null)
                 existing.LastUsedAt = DateTime.Now;
+        }
+
+        /// <summary>端末の表示ラベルの最大文字数。これを超える入力は先頭から切り詰める。</summary>
+        private const int MaxDisplayLabelLength = 40;
+
+        /// <summary>
+        /// 端末の表示ラベルを設定する。label は trim し、空文字/空白のみは null へ正規化。
+        /// 40 文字を超える場合は先頭 40 文字に切り詰める。
+        /// 対象端末が見つかれば true、無ければ false（保存は呼び出し側の責務）。
+        /// </summary>
+        public bool SetDisplayLabel(string deviceId, string? label)
+        {
+            var existing = Find(deviceId);
+            if (existing == null)
+                return false;
+
+            string? normalized = label?.Trim();
+            if (string.IsNullOrEmpty(normalized))
+                normalized = null;
+            else if (normalized.Length > MaxDisplayLabelLength)
+                normalized = normalized.Substring(0, MaxDisplayLabelLength);
+
+            existing.DisplayLabel = normalized;
+            return true;
         }
 
         /// <summary>端末を削除して席を返却する。削除できれば true。</summary>

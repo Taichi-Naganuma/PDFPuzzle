@@ -78,42 +78,67 @@
                             <DataTemplate>
                                 <Border BorderBrush="#F0F0F0" BorderThickness="0,0,0,1" Padding="6,6">
                                     <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="140"/>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="92"/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0" Orientation="Horizontal"
-                                                    VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding MachineName}"
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- 1行目: マシン名＋管理者バッジ / ユーザー名 / 最終利用 / 解除 -->
+                                        <Grid Grid.Row="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="140"/>
+                                                <ColumnDefinition Width="150"/>
+                                                <ColumnDefinition Width="92"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal"
+                                                        VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding MachineName}"
+                                                           FontSize="12" Foreground="#212121"
+                                                           VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <!-- 管理者席バッジ。IsAdmin が true のときのみ表示。
+                                                     v0.2 は識別・表示のみ ── 権限差は無い。 -->
+                                                <Border Margin="6,0,0,0" Padding="5,1"
+                                                        CornerRadius="3" Background="#E3F2FD"
+                                                        VerticalAlignment="Center"
+                                                        Visibility="{Binding IsAdmin,
+                                                            Converter={StaticResource BoolToVis}}">
+                                                    <TextBlock Text="{DynamicResource Seat_AdminBadge}"
+                                                               FontSize="10" FontWeight="SemiBold"
+                                                               Foreground="#1565C0"/>
+                                                </Border>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding UserName}"
                                                        FontSize="12" Foreground="#212121"
-                                                       VerticalAlignment="Center"
-                                                       TextTrimming="CharacterEllipsis"/>
-                                            <!-- 管理者席バッジ。IsAdmin が true のときのみ表示。
-                                                 v0.2 は識別・表示のみ ── 権限差は無い。 -->
-                                            <Border Margin="6,0,0,0" Padding="5,1"
-                                                    CornerRadius="3" Background="#E3F2FD"
-                                                    VerticalAlignment="Center"
-                                                    Visibility="{Binding IsAdmin,
-                                                        Converter={StaticResource BoolToVis}}">
-                                                <TextBlock Text="{DynamicResource Seat_AdminBadge}"
-                                                           FontSize="10" FontWeight="SemiBold"
-                                                           Foreground="#1565C0"/>
-                                            </Border>
+                                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding LastUsedAtDisplay}"
+                                                       FontSize="11" Foreground="#757575"
+                                                       VerticalAlignment="Center"/>
+                                            <Button Grid.Column="3"
+                                                    x:Name="ReleaseSeatButton"
+                                                    Content="{DynamicResource Seat_Release}"
+                                                    Tag="{Binding DeviceId}"
+                                                    Height="28" FontSize="11"
+                                                    Click="ReleaseSeatButton_Click"/>
+                                        </Grid>
+
+                                        <!-- 2行目: 端末の表示名（任意ラベル）の編集行 -->
+                                        <StackPanel Grid.Row="1" Orientation="Horizontal"
+                                                    Margin="0,6,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{DynamicResource Seat_LabelPrompt}"
+                                                       FontSize="11" Foreground="#757575"
+                                                       VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                            <TextBox Text="{Binding DisplayLabel, Mode=TwoWay,
+                                                                UpdateSourceTrigger=PropertyChanged}"
+                                                     MaxLength="40" Width="220" Height="24"
+                                                     FontSize="11" VerticalContentAlignment="Center"/>
+                                            <Button Content="{DynamicResource Seat_SaveLabel}"
+                                                    Tag="{Binding DeviceId}"
+                                                    Height="28" FontSize="11"
+                                                    Padding="10,0" Margin="6,0,0,0"
+                                                    Click="SaveLabelButton_Click"/>
                                         </StackPanel>
-                                        <TextBlock Grid.Column="1" Text="{Binding UserName}"
-                                                   FontSize="12" Foreground="#212121"
-                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Grid.Column="2" Text="{Binding LastUsedAtDisplay}"
-                                                   FontSize="11" Foreground="#757575"
-                                                   VerticalAlignment="Center"/>
-                                        <Button Grid.Column="3"
-                                                x:Name="ReleaseSeatButton"
-                                                Content="{DynamicResource Seat_Release}"
-                                                Tag="{Binding DeviceId}"
-                                                Height="28" FontSize="11"
-                                                Click="ReleaseSeatButton_Click"/>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
