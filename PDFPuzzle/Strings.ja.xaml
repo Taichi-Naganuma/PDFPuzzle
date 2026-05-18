@@ -153,5 +153,6 @@
     <sys:String x:Key="Seat_SaveLabel">保存</sys:String>
     <sys:String x:Key="Seat_Label_Saved">表示名を保存しました。</sys:String>
     <sys:String x:Key="Seat_Label_Failed">表示名の保存に失敗しました。</sys:String>
+    <sys:String x:Key="Seat_OverSeatWarning">⚠ 席数超過 ── 契約席数を {0} 台分 超えて端末が登録されています。下の一覧から {0} 台の席を解除してください。超過が解消するまで新しい端末は追加できません。</sys:String>
 
 </ResourceDictionary>

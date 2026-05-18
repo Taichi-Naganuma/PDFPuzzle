@@ -965,6 +965,30 @@ namespace PDFPuzzle.Tests
             // seatCount=0 でも used=2 なら Maximum=2（Value=2 を収容）。
             Assert.Equal(2d, SeatDisplayFormatter.ProgressMaximum(2, 0));
         }
+
+        // --- IsOverSeated: 席数超過（UsedSeats > SeatCount）判定（v0.2 第8次） ---
+
+        [Theory]
+        [InlineData(2, 3, false)]
+        [InlineData(3, 3, false)]
+        [InlineData(5, 3, true)]
+        [InlineData(0, 0, false)]
+        [InlineData(1, 0, true)]
+        [InlineData(10, 5, true)]
+        public void IsOverSeated_ReturnsTrueOnlyWhenUsedExceedsSeatCount(int used, int seatCount, bool expected)
+            => Assert.Equal(expected, SeatDisplayFormatter.IsOverSeated(used, seatCount));
+
+        // --- ExcessSeatCount: 超過台数（解除すべき台数）。非超過は 0（v0.2 第8次） ---
+
+        [Theory]
+        [InlineData(2, 3, 0)]
+        [InlineData(3, 3, 0)]
+        [InlineData(5, 3, 2)]
+        [InlineData(10, 5, 5)]
+        [InlineData(1, 0, 1)]
+        [InlineData(0, 0, 0)]
+        public void ExcessSeatCount_ReturnsExcessOrZero(int used, int seatCount, int expected)
+            => Assert.Equal(expected, SeatDisplayFormatter.ExcessSeatCount(used, seatCount));
     }
 
     // ---------------------------------------------------------------

@@ -153,5 +153,6 @@
     <sys:String x:Key="Seat_SaveLabel">Save</sys:String>
     <sys:String x:Key="Seat_Label_Saved">Label saved.</sys:String>
     <sys:String x:Key="Seat_Label_Failed">Failed to save label.</sys:String>
+    <sys:String x:Key="Seat_OverSeatWarning">⚠ Over seat limit — {0} more device(s) are registered than your licensed seats. Release {0} seat(s) from the list below. New devices cannot be added until the excess is resolved.</sys:String>
 
 </ResourceDictionary>

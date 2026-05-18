@@ -46,5 +46,18 @@ namespace PDFPuzzle
             int effective = seatCount > 0 ? seatCount : 1;
             return usedSeats > effective ? usedSeats : effective;
         }
+
+        /// <summary>
+        /// 席数超過（ダウングレード等で UsedSeats > SeatCount）かどうか。
+        /// </summary>
+        public static bool IsOverSeated(int usedSeats, int seatCount)
+            => usedSeats > seatCount;
+
+        /// <summary>
+        /// 契約席数を超えて登録されている端末数。超過していなければ 0。
+        /// 警告文に出す「あと何台 解除すべきか」の値。
+        /// </summary>
+        public static int ExcessSeatCount(int usedSeats, int seatCount)
+            => usedSeats > seatCount ? usedSeats - seatCount : 0;
     }
 }

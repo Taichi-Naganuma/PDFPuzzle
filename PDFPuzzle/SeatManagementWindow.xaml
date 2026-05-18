@@ -18,6 +18,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -47,14 +48,24 @@
                      Height="14" Margin="0,2,0,12"
                      Minimum="0" Foreground="#1565C0"/>
 
+        <!-- 席数超過の警告バナー。UsedSeats > SeatCount のときのみ表示（既定 Collapsed）。 -->
+        <Border x:Name="OverSeatWarning" Grid.Row="4"
+                Background="#FFF3E0" BorderBrush="#FFB74D" BorderThickness="1"
+                CornerRadius="3" Padding="10,7" Margin="0,0,0,10"
+                Visibility="Collapsed">
+            <TextBlock x:Name="OverSeatWarningText"
+                       FontSize="11" Foreground="#E65100"
+                       TextWrapping="Wrap"/>
+        </Border>
+
         <!-- 端末リスト見出し -->
-        <TextBlock Grid.Row="4"
+        <TextBlock Grid.Row="5"
                    Text="{DynamicResource Seat_DevicesHeading}"
                    FontWeight="SemiBold" Foreground="#424242"
                    FontSize="12" Margin="0,4,0,6"/>
 
         <!-- 端末リスト列見出し -->
-        <Grid Grid.Row="5" Margin="6,0,6,4">
+        <Grid Grid.Row="6" Margin="6,0,6,4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="140"/>
@@ -70,7 +81,7 @@
         </Grid>
 
         <!-- 端末リスト本体 -->
-        <Border Grid.Row="6" BorderBrush="#E0E0E0" BorderThickness="1">
+        <Border Grid.Row="7" BorderBrush="#E0E0E0" BorderThickness="1">
             <Grid>
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <ItemsControl x:Name="DeviceListControl">
@@ -155,12 +166,12 @@
         </Border>
 
         <!-- ステータスメッセージ -->
-        <TextBlock x:Name="StatusText" Grid.Row="7"
+        <TextBlock x:Name="StatusText" Grid.Row="8"
                    TextWrapping="Wrap" FontSize="11"
                    Margin="0,8,0,0" VerticalAlignment="Top"/>
 
         <!-- ボタン行 -->
-        <Grid Grid.Row="8" Margin="0,8,0,0">
+        <Grid Grid.Row="9" Margin="0,8,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>

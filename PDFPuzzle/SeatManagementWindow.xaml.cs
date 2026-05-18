@@ -65,6 +65,17 @@ namespace PDFPuzzle
             SeatProgressBar.Maximum = SeatDisplayFormatter.ProgressMaximum(store.UsedSeats, store.SeatCount);
             SeatProgressBar.Value = store.UsedSeats;
 
+            // 席数超過（ダウングレード等で UsedSeats > SeatCount）の警告。
+            // 自動解除はしない ── 管理者が下の一覧から手動で席解除する。
+            bool overSeated = SeatDisplayFormatter.IsOverSeated(store.UsedSeats, store.SeatCount);
+            OverSeatWarning.Visibility = overSeated ? Visibility.Visible : Visibility.Collapsed;
+            if (overSeated)
+            {
+                OverSeatWarningText.Text = string.Format(
+                    LocalizationService.Get("Seat_OverSeatWarning"),
+                    SeatDisplayFormatter.ExcessSeatCount(store.UsedSeats, store.SeatCount));
+            }
+
             // 管理者席（最も早くアクティベートした端末）の deviceId を一度だけ取得。
             string? adminId = store.GetAdminDeviceId();
 
