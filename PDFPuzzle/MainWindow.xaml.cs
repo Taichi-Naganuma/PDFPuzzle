@@ -43,8 +43,12 @@ namespace PDFPuzzle
         {
             var baseTitle = LocalizationService.Get("AppTitle");
             var tier = LicenseService.GetCurrentTier();
-            var tierLabel = LocalizationService.Get(tier == LicenseTier.Business
-                ? "Tier_Business" : "Tier_Personal");
+            var tierLabel = LocalizationService.Get(tier switch
+            {
+                LicenseTier.Team => "Tier_Team",
+                LicenseTier.Business => "Tier_Business",
+                _ => "Tier_Personal",
+            });
             Title = $"{baseTitle} - {tierLabel}";
         }
 
