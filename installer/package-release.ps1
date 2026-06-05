@@ -46,7 +46,7 @@
 [CmdletBinding()]
 param(
     [string]$InstallerPath = "",
-    [string]$ReadmePath = (Join-Path $PSScriptRoot "はじめにお読みください.txt"),
+    [string]$ReadmePath = "",
     [string]$OutputZip = "",
     [switch]$AllowUnsigned
 )
@@ -116,6 +116,9 @@ function New-DistributionZip {
     }
 
     Add-Type -AssemblyName System.IO.Compression.FileSystem | Out-Null
+    # PS 5.1: ZipFile/ZipFileExtensions は FileSystem.dll、ZipArchiveMode/CompressionLevel
+    # は System.IO.Compression.dll に定義されるため、両方ロードする。
+    Add-Type -AssemblyName System.IO.Compression | Out-Null
     $level = [System.IO.Compression.CompressionLevel]::Optimal
     $zip = [System.IO.Compression.ZipFile]::Open($ZipPath, [System.IO.Compression.ZipArchiveMode]::Create)
     try {
@@ -136,6 +139,12 @@ function Main {
     Write-PkgLog "==================================================================="
     Write-PkgLog "Distribution Packager (Sala 2026-06-04)"
     Write-PkgLog "==================================================================="
+
+    # $PSScriptRoot は [CmdletBinding()] 付きスクリプトの param 既定値評価時には
+    # 空になる場合がある (-File 起動時に再現)。README 既定値は本文スコープで解決する。
+    if ([string]::IsNullOrEmpty($ReadmePath)) {
+        $ReadmePath = Join-Path $PSScriptRoot "はじめにお読みください.txt"
+    }
 
     $InstallerPath = Resolve-InstallerPath -Hint $InstallerPath
     $meta = Get-ProductMetadata -Path $InstallerPath
