@@ -5,10 +5,14 @@ namespace PDFPuzzle
 {
     public static class LicenseService
     {
-        private const string ProductPermalink = "zjmmda";   // 個人版/事業者版（既存）
-        // TODO(Gumroad): チーム版商品 作成後に実 permalink へ差替。COO が hotfix commit する。
-        private const string TeamProductPermalink = "PLACEHOLDER-team-pending";
+        private const string JapaneseProductId = "HWFoThBgu9wxg17mi8jHvw==";
+        private const string EnglishProductId = "ZDwEWUWgu9QHtexley1PVA==";
+        private const string JapanesePurchaseUrl = "https://bookworm807.gumroad.com/l/mfiouo";
+        private const string EnglishPurchaseUrl = "https://bookworm807.gumroad.com/l/jnmmf";
         private const string VerifyUrl = "https://api.gumroad.com/v2/licenses/verify";
+
+        internal static Uri GetPurchaseUri(string? language) =>
+            new Uri(language == LocalizationService.English ? EnglishPurchaseUrl : JapanesePurchaseUrl);
 
 #if DEBUG
         // DEBUG 切替用環境変数（値: "Personal" / "Business" / "Team"、大小無視）
@@ -41,7 +45,7 @@ namespace PDFPuzzle
 #endif
         }
 
-        /// <summary>1つの product_permalink に対し verify POST を1回叩いた結果。</summary>
+        /// <summary>Gumroad の商品 ID 1つに対するライセンス認証の結果。</summary>
         private readonly struct VerifyOutcome
         {
             /// <summary>HTTP 応答を受け取り、JSON の <c>success</c> が true。</summary>
@@ -53,20 +57,20 @@ namespace PDFPuzzle
         }
 
         /// <summary>
-        /// 指定 permalink で verify POST を1回実行する。
+        /// 指定した商品 ID に対してライセンスを認証する。
         /// HTTP 例外は呼び出し側に伝播させる（既存の個人版挙動と同じ catch で処理するため）。
         /// </summary>
-        private static async Task<VerifyOutcome> VerifyWithPermalinkAsync(
-            HttpClient client, string permalink, string licenseKey)
+        private static async Task<VerifyOutcome> VerifyProductAsync(
+            HttpClient client, string productId, string licenseKey)
         {
-            var payload = new FormUrlEncodedContent(new[]
+            using var payload = new FormUrlEncodedContent(new[]
             {
-                new KeyValuePair<string, string>("product_permalink", permalink),
+                new KeyValuePair<string, string>("product_id", productId),
                 new KeyValuePair<string, string>("license_key", licenseKey),
                 new KeyValuePair<string, string>("increment_uses_count", "true"),
             });
 
-            var response = await client.PostAsync(VerifyUrl, payload);
+            using var response = await client.PostAsync(VerifyUrl, payload);
             string json = await response.Content.ReadAsStringAsync();
 
             var doc = JsonDocument.Parse(json);
@@ -95,26 +99,15 @@ namespace PDFPuzzle
             {
                 using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
 
-                // 1) 個人版/事業者版 permalink で verify。成功したら即終了
-                //    （個人版の挙動・所要時間に影響させない）。
-                var primary = await VerifyWithPermalinkAsync(client, ProductPermalink, key);
-
-                VerifyOutcome outcome = primary;
-
-                // 2) 個人版が失敗した場合のみ、チーム版 permalink で verify をリトライ。
-                if (!primary.Success)
+                // 表示言語の販売ページを先に試す。別言語で購入したキーも利用できる。
+                bool preferEnglish = AppSettings.Load().Language == LocalizationService.English;
+                var primary = await VerifyProductAsync(client, preferEnglish ? EnglishProductId : JapaneseProductId, key);
+                var outcome = primary.Success
+                    ? primary
+                    : await VerifyProductAsync(client, preferEnglish ? JapaneseProductId : EnglishProductId, key);
+                if (!outcome.Success)
                 {
-                    var team = await VerifyWithPermalinkAsync(client, TeamProductPermalink, key);
-                    if (team.Success)
-                    {
-                        outcome = team;
-                    }
-                    else
-                    {
-                        // 両方失敗 → 1回目（個人版）の失敗メッセージを返す。
-                        team.Document?.Dispose();
-                        return (false, primary.Message);
-                    }
+                    return (false, primary.Message);
                 }
 
                 // --- ここから verify 成功（outcome.Document は非 null）---
