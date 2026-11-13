@@ -1,11 +1,12 @@
 // PDFPuzzle 動作確認スクリプト
 // dotnet script または dotnet-script で実行
 
-#r "nuget: PdfSharpCore, 1.3.65"
-#r "nuget: PdfPig, 0.1.9"
+#r "nuget: PDFsharp, 6.2.4"
+#r "nuget: System.Security.Cryptography.Pkcs, 10.0.15"
 
-using PdfSharpCore.Pdf;
-using PdfSharpCore.Pdf.IO;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
+using PdfSharp.Drawing;
 using System.IO;
 
 var testDir = Path.Combine(Path.GetTempPath(), "PDFPuzzle_Test");
@@ -18,16 +19,12 @@ string pdf2 = Path.Combine(testDir, "test2.pdf");
 
 void CreateSamplePdf(string path, int pages)
 {
-    var doc = new PdfDocument();
+    using var doc = new PdfDocument();
     for (int i = 0; i < pages; i++)
     {
         var page = doc.AddPage();
-        var gfx = PdfSharpCore.Drawing.XGraphics.FromPdfPage(page);
-        gfx.DrawString($"Page {i + 1} of {Path.GetFileName(path)}",
-            new PdfSharpCore.Drawing.XFont("Arial", 20),
-            PdfSharpCore.Drawing.XBrushes.Black,
-            new PdfSharpCore.Drawing.XRect(0, 0, page.Width, page.Height),
-            PdfSharpCore.Drawing.XStringFormats.Center);
+        using var gfx = XGraphics.FromPdfPage(page);
+        gfx.DrawRectangle(XBrushes.Black, 20, 20, 20 + 10 * i, 40);
     }
     doc.Save(path);
     Console.WriteLine($"  作成: {Path.GetFileName(path)} ({pages}ページ)");

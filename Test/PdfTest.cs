@@ -1,9 +1,9 @@
-using PdfSharpCore.Pdf;
-using PdfSharpCore.Pdf.IO;
-using PdfSharpCore.Drawing;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
+using PdfSharp.Drawing;
 using System.IO;
 
-var testDir = Path.Combine(Path.GetTempPath(), "PDFPuzzle_Test");
+var testDir = Directory.CreateTempSubdirectory("PDFPuzzle_Test_").FullName;
 Directory.CreateDirectory(testDir);
 Console.WriteLine($"テストフォルダ: {testDir}\n");
 
@@ -21,14 +21,12 @@ string pdf2 = Path.Combine(testDir, "test2.pdf");
 
 void CreatePdf(string path, int pages)
 {
-    var doc = new PdfDocument();
+    using var doc = new PdfDocument();
     for (int i = 0; i < pages; i++)
     {
         var page = doc.AddPage();
-        var gfx = XGraphics.FromPdfPage(page);
-        gfx.DrawString($"Page {i+1} / {Path.GetFileName(path)}",
-            new XFont("Arial", 18), XBrushes.Black,
-            new XRect(0, 0, page.Width, page.Height), XStringFormats.Center);
+        using var gfx = XGraphics.FromPdfPage(page);
+        gfx.DrawRectangle(XBrushes.Black, 20, 20, 20 + 10 * i, 40);
     }
     doc.Save(path);
 }
