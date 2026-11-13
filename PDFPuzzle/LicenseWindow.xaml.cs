@@ -11,6 +11,7 @@ namespace PDFPuzzle
         public LicenseWindow()
         {
             InitializeComponent();
+            BuyLink.NavigateUri = LicenseService.GetPurchaseUri(LocalizationService.CurrentLanguage);
             RefreshTierDisplay();
         }
 

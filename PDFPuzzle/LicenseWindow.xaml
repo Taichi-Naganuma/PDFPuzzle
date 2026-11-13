@@ -150,7 +150,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0" VerticalAlignment="Center">
-                <Hyperlink x:Name="BuyLink" NavigateUri="https://gumroad.com"
+                <Hyperlink x:Name="BuyLink"
                            RequestNavigate="BuyLink_RequestNavigate">
                     <Run Text="{DynamicResource License_BuyLink}"/>
                 </Hyperlink>

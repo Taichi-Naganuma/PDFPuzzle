@@ -1,5 +1,5 @@
-using PdfSharpCore.Pdf;
-using PdfSharpCore.Pdf.IO;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 using System.IO;
 using System.Windows;
 using static PDFPuzzle.MainWindow;
